@@ -1,49 +1,43 @@
-﻿using Auth.Model;
+﻿using Auth.Models;
 using Auth.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Auth.Controllers;
-
-[Route("")]
-[ApiController]
-public class AuthController : ControllerBase
+namespace Auth.Controllers
 {
-    private readonly JwtService _jwtService;
-    private readonly ILogger<AuthController> _logger;
-    public AuthController(JwtService jwtService, ILogger<AuthController> logger)
+    [Route("[action]")]
+    [ApiController]
+    public class AuthController : ControllerBase
     {
-        _jwtService = jwtService;
-        _logger = logger;
-    }
+        private readonly JwtService _jwtService;
 
-    [AllowAnonymous]
-    [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequestModel data)
-    {
-        var result = await _jwtService.Authenticate(data.IDno, data.Password);
-        if (result == null)
+        public AuthController(JwtService jwtService)
         {
-            return Unauthorized();
-        }
-        return Ok(result);
-    }
-
-    [HttpGet("getinfo")]
-    public IActionResult GetUserInfo()
-    {
-        // Log the token
-        var token = HttpContext.Request.Headers["Authorization"].ToString();
-        _logger.LogInformation("User Identity: {UserIdentity}", User.Identity?.Name);
-        _logger.LogInformation("User Claims:");
-        foreach (var claim in User.Claims)
-        {
-            _logger.LogInformation("{ClaimType}: {ClaimValue}", claim.Type, claim.Value);
+            _jwtService = jwtService;
         }
 
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> login([FromBody] LoginRequest data)
+        {
+            if (String.IsNullOrEmpty(data.IDno))
+            {
+                return BadRequest(new { message = "ID number needs to entered" });
+            }
+            else if (String.IsNullOrEmpty(data.Password))
+            {
+                return BadRequest(new { message = "Password needs to entered" });
+            }
 
-        return Ok(token);
+            string result = await _jwtService.login(data.IDno, data.Password);
+
+            if (result == null)
+            {
+                return Unauthorized();
+            }
+
+            return Ok(result);
+        }
+
     }
-
 }
-

@@ -5,7 +5,7 @@ VisualStudioVersion = 17.11.35303.130
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Frontend", "Frontend\Frontend.csproj", "{7082BBF6-77E9-458D-BE61-6216FCFE73B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auth", "..\..\..\JWTAuthSample-main\JWTAuth\Auth.csproj", "{8412D79F-BE34-013B-EC1E-6B40E5AFC9FF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auth", "Auth\Auth.csproj", "{8412D79F-BE34-013B-EC1E-6B40E5AFC9FF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Course", "Course\Course.csproj", "{52C84B8D-DF57-4274-91C8-1F7399BB4938}"
 EndProject
