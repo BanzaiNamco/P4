@@ -1,0 +1,101 @@
+@* @model List<CourseModel> *@
+@* @{ *@
+@*     ViewData["Title"] = "ArcherHub"; *@
+@* } *@
+
+@* <style> *@
+@*     body { *@
+@*         background: linear-gradient(135deg, #e0f7fa, #ffffff); *@
+@*         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; *@
+@*     } *@
+
+@*     .courses-table-container { *@
+@*         max-width: 900px; *@
+@*         margin: 0 auto; *@
+@*         background-color: #ffffff; *@
+@*         border-radius: 15px; *@
+@*         padding: 20px; *@
+@*         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); *@
+@*     } *@
+
+@*     .course-row { *@
+@*         padding: 10px 0; *@
+@*         border-bottom: 1px solid #ddd; *@
+@*     } *@
+
+@*     .action-btn { *@
+@*         border: none; *@
+@*         background: none; *@
+@*         padding: 5px 10px; *@
+@*         font-size: 1.2rem; *@
+@*         cursor: pointer; *@
+@*         transition: color 0.2s ease; *@
+@*     } *@
+
+@*     .action-btn.encode { *@
+@*         color: #007bff; *@
+@*     } *@
+
+@*     .action-btn.encode:hover { *@
+@*         color: #0056b3; *@
+@*     } *@
+
+@*     .section-dropdown { *@
+@*         width: 250px; *@
+@*         margin-top: 10px; *@
+@*         display: inline-block; *@
+@*     } *@
+
+@*     .section-wrapper { *@
+@*         display: flex; *@
+@*         justify-content: space-between; *@
+@*         align-items: center; *@
+@*     } *@
+@* </style> *@
+
+@* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" /> *@
+
+@* <div class="courses-table-container"> *@
+@*     <h3>Courses You Teach</h3> *@
+@*     <div id="coursesList"> *@
+@*         @if (Model != null && Model.Any()) *@
+@*         { *@
+@*             foreach (var course in Model) *@
+@*             { *@
+@*                 <div class="course-row"> *@
+@*                     <div class="course-info"> *@
+@*                         <strong>@course.CourseID</strong> - @course.CourseName *@
+@*                     </div> *@
+@*                     <div class="section-wrapper"> *@
+@*                         <div class="section-dropdown"> *@
+@*                             <select class="form-select" id="sectionDropdown_@course.CourseID"> *@
+@*                                 <option value="">Select Section</option> *@
+@*                                 @foreach (var section in course.Sections) *@
+@*                                 { *@
+@*                                     <option value="@section.SectionID">@section.SectionID</option> *@
+@*                                 } *@
+@*                             </select> *@
+@*                         </div> *@
+@*                         <button class="action-btn encode" onclick="proceedToEncodeGrades('@course.CourseID')"> *@
+@*                             <i class="fas fa-pencil-alt"></i> *@
+@*                         </button> *@
+@*                     </div> *@
+@*                 </div> *@
+@*             } *@
+@*         } *@
+@*         else *@
+@*         { *@
+@*             <p class="text-center">You are not teaching any courses.</p> *@
+@*         } *@
+@*     </div> *@
+@* </div> *@
+
+@* <script> *@
+@*     // Function to handle the "Proceed to Encode Grades" action *@
+@*     function proceedToEncodeGrades(courseID) { *@
+@*         const selectedSection = document.getElementById("sectionDropdown_" + courseID).value; *@
+
+@*         // Redirect professor to the grade entry page for the selected course and section *@
+@*         window.location.href = '/GradeEntry/EncodeGrades?courseID=' + courseID + '&sectionID=' + selectedSection; *@
+@*     } *@
+@* </script> *@

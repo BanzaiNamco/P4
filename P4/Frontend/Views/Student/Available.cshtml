@@ -1,0 +1,112 @@
+@model List<CourseModel>
+@{
+    ViewData["Title"] = "ArcherHub";
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #e0f7fa, #ffffff);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .action-bar {
+        margin: 40px auto 20px auto;
+        max-width: 900px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .search-input {
+        max-width: 300px;
+    }
+
+    .courses-table-container {
+        max-width: 900px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .action-btn {
+        border: none;
+        background: none;
+        padding: 5px 10px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+    .action-btn.edit {
+        color: #ffc107;
+    }
+
+    .action-btn.edit:hover {
+        color: #e0a800;
+    }
+
+    .action-btn.delete {
+        color: #dc3545;
+    }
+
+    .action-btn.delete:hover {
+        color: #bd2130;
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+
+<div class="action-bar">
+    <input type="text" class="form-control search-input" id="courseSearch" placeholder="Search available courses..." />
+</div>
+
+<div class="courses-table-container">
+    <table class="table table-hover" id="coursesTable">
+        <thead class="table-light">
+            <tr>
+                <th>Course ID</th>
+                <th>Course Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var course in Model)
+                {
+                    <tr>
+                        <td>@course.CourseID</td>
+                        <td>@course.CourseName</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="2" class="text-center">No available courses found.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.getElementById("courseSearch").addEventListener("input", function () {
+        const searchValue = this.value.toLowerCase();
+        const rows = document.querySelectorAll("#coursesTable tbody tr");
+
+        rows.forEach(row => {
+            const courseId = row.cells[0].textContent.toLowerCase();
+            const courseName = row.cells[1].textContent.toLowerCase();
+
+            if (courseId.includes(searchValue) || courseName.includes(searchValue)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    });
+</script>

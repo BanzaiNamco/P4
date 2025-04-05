@@ -1,0 +1,74 @@
+@* @model List<StudentCourseGradeModel> *@
+@* @{ *@
+@*     ViewData["Title"] = "Previous Grades - ArcherHub"; *@
+@* } *@
+
+@* <style> *@
+@*     body { *@
+@*         background: linear-gradient(135deg, #e0f7fa, #ffffff); *@
+@*         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; *@
+@*     } *@
+
+@*     .grades-table-container { *@
+@*         max-width: 900px; *@
+@*         margin: 0 auto; *@
+@*         background-color: #ffffff; *@
+@*         border-radius: 15px; *@
+@*         padding: 20px; *@
+@*         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); *@
+@*     } *@
+
+@*     .grades-table th, .grades-table td { *@
+@*         padding: 10px; *@
+@*         text-align: center; *@
+@*     } *@
+
+@*     .grades-table th { *@
+@*         background-color: #f8f9fa; *@
+@*     } *@
+
+@*     .grades-table td { *@
+@*         font-size: 1.2rem; *@
+@*     } *@
+
+@*     .form-container { *@
+@*         text-align: center; *@
+@*         margin-top: 20px; *@
+@*     } *@
+@* </style> *@
+
+@* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" /> *@
+
+@* <div class="grades-table-container"> *@
+@*     <h3>Previous Grades</h3> *@
+@*     <table class="table grades-table"> *@
+@*         <thead class="table-light"> *@
+@*             <tr> *@
+@*                 <th>Course Name</th> *@
+@*                 <th>Grade</th> *@
+@*             </tr> *@
+@*         </thead> *@
+@*         <tbody> *@
+@*             @if (Model != null && Model.Any()) *@
+@*             { *@
+@*                 foreach (var course in Model) *@
+@*                 { *@
+@*                     <tr> *@
+@*                         <td>@course.CourseName</td> *@
+@*                         <td>@course.Grade</td> *@
+@*                     </tr> *@
+@*                 } *@
+@*             } *@
+@*             else *@
+@*             { *@
+@*                 <tr> *@
+@*                     <td colspan="2" class="text-center">No previous grades available.</td> *@
+@*                 </tr> *@
+@*             } *@
+@*         </tbody> *@
+@*     </table> *@
+@* </div> *@
+
+@* <div class="form-container"> *@
+@*     <a href="@Url.Action("Index", "Dashboard")" class="btn btn-primary">Back to Dashboard</a> *@
+@* </div> *@

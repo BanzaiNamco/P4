@@ -1,0 +1,153 @@
+@model List<CourseModel>
+@{
+    ViewData["Title"] = "ArcherHub";
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #e0f7fa, #ffffff);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .action-bar {
+        margin: 40px auto 20px auto;
+        max-width: 900px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .search-input {
+        max-width: 300px;
+    }
+
+    .courses-table-container {
+        max-width: 900px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .course-row {
+        padding: 10px 0;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .section-dropdown {
+        display: none;
+        margin-top: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+    }
+
+    .action-btn {
+        border: none;
+        background: none;
+        padding: 5px 10px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+    .action-btn.plus {
+        color: #28a745;
+    }
+
+    .action-btn.plus:hover {
+        color: #218838;
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+
+<div class="action-bar">
+    <input type="text" class="form-control search-input" id="courseSearch" placeholder="Search available courses..." />
+</div>
+
+<div class="courses-table-container">
+    <div id="coursesList">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var course in Model)
+            {
+                <div class="course-row">
+                    <div class="d-flex justify-content-between">
+                        <div class="course-info">
+                            <strong>@course.CourseID</strong> - @course.CourseName
+                        </div>
+                        <button class="btn btn-info" onclick="toggleSections('@course.CourseID')">View Sections</button>
+                    </div>
+
+                    <!-- Dropdown for sections -->
+                    <div class="section-dropdown" id="sections-@course.CourseID">
+                            <div class="d-flex justify-content-between">
+                                <span>section.SectionName</span>
+                                <button class="action-btn plus" onclick="enlistCourse('course.CourseID', 'section.SectionID')">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="text-center">No courses available to enlist.</p>
+        }
+    </div>
+</div>
+
+<script>
+    // Function to toggle sections visibility
+    function toggleSections(courseID) {
+        const sectionDiv = document.getElementById('sections-' + courseID);
+        sectionDiv.style.display = sectionDiv.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // Function to enlist the course for the student (you may need an AJAX call or form submission here)
+    function enlistCourse(courseID, sectionID) {
+        // Example AJAX request to add course
+        fetch('/Course/Enlist', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                courseID: courseID,
+                sectionID: sectionID
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Course enlisted successfully!');
+            } else {
+                alert('Failed to enlist in course.');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    // Search functionality to filter courses
+    document.getElementById("courseSearch").addEventListener("input", function () {
+        const searchValue = this.value.toLowerCase();
+        const courseRows = document.querySelectorAll(".course-row");
+
+        courseRows.forEach(row => {
+            const courseId = row.querySelector(".course-info strong").textContent.toLowerCase();
+            const courseName = row.querySelector(".course-info").textContent.toLowerCase();
+
+            if (courseId.includes(searchValue) || courseName.includes(searchValue)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    });
+</script>

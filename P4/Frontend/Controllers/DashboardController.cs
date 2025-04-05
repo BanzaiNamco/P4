@@ -10,10 +10,13 @@ namespace Frontend.Controllers
         public IActionResult Index()
         {
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
-
+            if (TempData["ErrorMessage"] != null)
+            {
+                ModelState.AddModelError(string.Empty, "Error connecting to the server.");
+            }
             if (string.IsNullOrEmpty(role))
             {
-                return RedirectToAction("AccessDenied", "Account"); // Redirect to a page that shows an error if role is missing
+                return RedirectToAction("Index, Login");
             }
 
             if (role == "prof")
@@ -30,7 +33,7 @@ namespace Frontend.Controllers
             }
             else
             {
-                return RedirectToAction("AccessDenied", "Account"); // Redirect if role is unrecognized
+                return RedirectToAction("Index, Login");
             }
         }
     }

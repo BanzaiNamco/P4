@@ -6,11 +6,9 @@ namespace Frontend.Controllers
     public class LoginController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ILogger<LoginController> _logger;
-        public LoginController(IHttpClientFactory httpClientFactory, ILogger<LoginController> logger)
+        public LoginController(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
-            _logger = logger;
         }
 
         [HttpGet]
@@ -31,24 +29,38 @@ namespace Frontend.Controllers
         public async Task<IActionResult> Login(LoginViewModel data)
         {
             if (!ModelState.IsValid)
-                return View("", data);
+                return View("Index", data);
 
             var client = _httpClientFactory.CreateClient();
-            var response = await client.PostAsJsonAsync("https://localhost:8001/login", data);
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-                var result = await response.Content.ReadAsStringAsync();
-                HttpContext.Session.SetString("JWToken", result);
-                _logger.LogInformation("User logged in successfully. Token: {Token}", result);
-                return RedirectToAction("Index", "Dashboard");
+                var response = await client.PostAsJsonAsync("https://localhost:8001/login", data);
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadAsStringAsync();
+                    HttpContext.Session.SetString("JWToken", result);
+                    return RedirectToAction("Index", "Dashboard");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Invalid credentials.");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, "Invalid credentials.");
+                ModelState.AddModelError(string.Empty, "Error connecting to the server.");
+                return View("Index", data);
             }
 
-            return View("", data);
+            return View("Index", data);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Remove("JWToken");
+            return RedirectToAction("Index", "Login");
         }
     }
 }

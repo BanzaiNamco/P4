@@ -1,0 +1,122 @@
+@* @model List<StudentGradeModel> *@
+@* @{ *@
+@*     ViewData["Title"] = "Encode Grades - ArcherHub"; *@
+@* } *@
+
+@* <style> *@
+@*     body { *@
+@*         background: linear-gradient(135deg, #e0f7fa, #ffffff); *@
+@*         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; *@
+@*     } *@
+
+@*     .grades-table-container { *@
+@*         max-width: 900px; *@
+@*         margin: 0 auto; *@
+@*         background-color: #ffffff; *@
+@*         border-radius: 15px; *@
+@*         padding: 20px; *@
+@*         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); *@
+@*     } *@
+
+@*     .grades-table th, .grades-table td { *@
+@*         padding: 10px; *@
+@*         text-align: center; *@
+@*     } *@
+
+@*     .grades-table th { *@
+@*         background-color: #f8f9fa; *@
+@*     } *@
+
+@*     .grades-table td input { *@
+@*         width: 80px; *@
+@*     } *@
+
+@*     .action-btn { *@
+@*         border: none; *@
+@*         background: none; *@
+@*         padding: 5px 10px; *@
+@*         font-size: 1.2rem; *@
+@*         cursor: pointer; *@
+@*         transition: color 0.2s ease; *@
+@*     } *@
+
+@*     .action-btn.save { *@
+@*         color: #28a745; *@
+@*     } *@
+
+@*     .action-btn.save:hover { *@
+@*         color: #218838; *@
+@*     } *@
+
+@*     .form-container { *@
+@*         display: flex; *@
+@*         justify-content: space-between; *@
+@*         align-items: center; *@
+@*         gap: 1rem; *@
+@*     } *@
+@* </style> *@
+
+@* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" /> *@
+
+@* <div class="grades-table-container"> *@
+@*     <h3>Encode Grades for Section @ViewData["SectionID"]</h3> *@
+@*     <div id="studentsGradesList"> *@
+@*         <table class="table grades-table"> *@
+@*             <thead class="table-light"> *@
+@*                 <tr> *@
+@*                     <th>Student ID</th> *@
+@*                     <th>Grade</th> *@
+@*                 </tr> *@
+@*             </thead> *@
+@*             <tbody> *@
+@*                 @foreach (var student in Model) *@
+@*                 { *@
+@*                     <tr> *@
+@*                         <td>@student.StudentID</td> *@
+@*                         <td> *@
+@*                             <input type="text" class="form-control grade-input" id="grade_@student.StudentID" value="@student.Grade" maxlength="3" /> *@
+@*                         </td> *@
+@*                     </tr> *@
+@*                 } *@
+@*             </tbody> *@
+@*         </table> *@
+@*     </div> *@
+
+@*     <div class="form-container"> *@
+@*         <button class="action-btn save" onclick="saveGrades()"> *@
+@*             <i class="fas fa-save"></i> Save Grades *@
+@*         </button> *@
+@*     </div> *@
+@* </div> *@
+
+@* <script> *@
+@*     // Define valid grade values *@
+@*     const validGrades = ["0.0", "1.0", "1.5", "2.0", "2.5", "3.0", "3.5", "4.0"]; *@
+
+@*     // Save the grades function *@
+@*     function saveGrades() { *@
+@*         const gradesData = []; *@
+
+@*         // Collect all grades data *@
+@*         document.querySelectorAll(".grade-input").forEach(input => { *@
+@*             const studentID = input.id.split("_")[1]; *@
+@*             const grade = input.value; *@
+
+@*             // Validate grade *@
+@*             if (!validGrades.includes(grade)) { *@
+@*                 alert(`Invalid grade for Student ID ${studentID}. Please enter a valid grade.`); *@
+@*                 return; *@
+@*             } *@
+
+@*             gradesData.push({ StudentID: studentID, Grade: grade }); *@
+@*         }); *@
+
+@*         // Send data to server (Assuming you have a POST endpoint to save the grades) *@
+@*         if (gradesData.length > 0) { *@
+@*             // Make an AJAX request or submit the form to save the grades *@
+@*             alert("Grades saved successfully!"); *@
+@*             // Example: Call your controller action here *@
+@*             // $.post('/Grades/SaveGrades', { grades: gradesData }); *@
+@*         } *@
+@*     } *@
+@* </script> *@
