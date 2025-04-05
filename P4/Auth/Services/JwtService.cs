@@ -23,9 +23,9 @@ namespace Auth.Services
         {
             User? user = await _dbContext.Users.FindAsync(IDNo);
 
-            if (user == null || BCrypt.Verify(password, user.PasswordHash) == false)
+            if (user == null || BCrypt.Verify(password, user.Password) == false)
             {
-                return null; //returning null intentionally to show that login was unsuccessful
+                return null;
             }
 
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -49,7 +49,7 @@ namespace Auth.Services
             tokenHandler.WriteToken(token);
             string jwt = tokenHandler.WriteToken(token);
 
-            return jwt; // <-- return both
+            return jwt;
         }
     }
 }

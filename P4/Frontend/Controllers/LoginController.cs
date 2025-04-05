@@ -1,85 +1,54 @@
-using Frontend.Models;
-using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using System.Diagnostics;
-using System.Security.Claims;
-using System.Text;
 
 namespace Frontend.Controllers
 {
-    [Route("login")]
     public class LoginController : Controller
     {
+        private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<LoginController> _logger;
-        private readonly IHttpClientFactory _httpClientFactory;  // Inject IHttpClientFactory to make HTTP calls
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        public LoginController(ILogger<LoginController> logger, IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor)
+        public LoginController(IHttpClientFactory httpClientFactory, ILogger<LoginController> logger)
         {
-            _logger = logger;
             _httpClientFactory = httpClientFactory;
-            _httpContextAccessor = httpContextAccessor;
+            _logger = logger;
         }
 
-        // GET: /Login
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult Index()
         {
-            return View(); // Display the Login view
+            var token = HttpContext.Session.GetString("JWToken");
+            if (!string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Index", "Dashboard");
+            }
+
+            return View();
         }
 
-        // POST: /Login
         [HttpPost]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        [AllowAnonymous]
+        public async Task<IActionResult> Login(LoginViewModel data)
         {
-            // If the form data is not valid, return the form with validation errors
             if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
+                return View("", data);
 
-            // Create an HttpClient instance using IHttpClientFactory
             var client = _httpClientFactory.CreateClient();
+            var response = await client.PostAsJsonAsync("https://localhost:8001/login", data);
 
-            // Prepare the payload (credentials)
-            var payload = new
+            if (response.IsSuccessStatusCode)
             {
-                IDno = model.IDNumber,
-                Password = model.Password
-            };
-
-            // Send a POST request to the API
-            var response = await client.PostAsync("https://localhost:8001/login",
-                new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json"));
-
-            if (!response.IsSuccessStatusCode)
+                var result = await response.Content.ReadAsStringAsync();
+                HttpContext.Session.SetString("JWToken", result);
+                _logger.LogInformation("User logged in successfully. Token: {Token}", result);
+                return RedirectToAction("Index", "Dashboard");
+            }
+            else
             {
-                // If the API returns an error (invalid credentials), show an error message
-                ModelState.AddModelError("", "Invalid credentials. Please try again.");
-                return View(model);
+                ModelState.AddModelError(string.Empty, "Invalid credentials.");
             }
 
-            // If the login is successful, retrieve the token from the response
-            var responseContent = await response.Content.ReadAsStringAsync();
-            dynamic tokenResponse = JsonConvert.DeserializeObject(responseContent);
-            string token = tokenResponse.token;
-            // Store the JWT token in session or cookies (to authenticate future requests)
-            await _httpContextAccessor.HttpContext.SignInAsync(
-                "Cookies", // Use Cookies authentication scheme
-                new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, model.IDNumber) }, "Cookies"))
-            );
-
-            //HttpContext.Session.SetString("jwt", token);
-
-            // Redirect the user to the dashboard (or another page) after successful login
-            return RedirectToAction("Index", "Dashboard");
-        }
-
-        // Error action (same as before, to handle any errors)
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View("", data);
         }
     }
 }
