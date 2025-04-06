@@ -1,0 +1,260 @@
+﻿@model List<CourseWithSectionModel>
+
+@{
+    ViewData["Title"] = "ArcherHub";
+}
+
+<style>
+    body {
+    background: linear-gradient(135deg, #e0f7fa, #ffffff);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .action-bar {
+    margin: 40px auto 20px auto;
+    max-width: 900px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    }
+
+    .search-input {
+    max-width: 300px;
+    }
+
+    .courses-table-container {
+    max-width: 900px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .action-btn {
+    border: none;
+    background: none;
+    padding: 5px 10px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    }
+
+    .action-btn.edit { color: #ffc107; }
+    .action-btn.edit:hover { color: #e0a800; }
+
+    .action-btn.delete { color: #dc3545; }
+    .action-btn.delete:hover { color: #bd2130; }
+
+    .action-btn.add { color: #28a745; }
+    .action-btn.add:hover { color: #218838; }
+
+    .section-row {
+    background-color: #f9f9f9;
+    }
+
+    .section-input input {
+    width: 100px;
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+
+<div class="action-bar">
+    <a href="@Url.Action("Add", "Course")" class="btn btn-primary">Add Course</a>
+    <input type="text" class="form-control search-input" id="courseSearch" placeholder="Search courses..." />
+</div>
+
+<div class="courses-table-container">
+    <table class="table table-hover" id="coursesTable">
+        <thead class="table-light">
+            <tr>
+                <th>Course ID</th>
+                <th>Course Name</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var each in Model)
+                {
+                    <tr id="course-@each.Course.CourseID">
+                        <td>@each.Course.CourseID</td>
+                        <td>@each.Course.CourseName</td>
+                        <td class="text-end">
+                            <button class="action-btn" onclick="toggleSections('@each.Course.CourseID')">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <button class="action-btn add" onclick="addSectionRow('@each.Course.CourseID')">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <a href="javascript:void(0);" onclick="editCourse('@each.Course.CourseID')" class="action-btn edit" title="Edit">
+                                <i class="fas fa-pen"></i>
+                            </a>
+                            <a href="javascript:void(0);" onclick="confirmDelete('@each.Course.CourseID')" class="action-btn delete" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr id="sections-@each.Course.CourseID" class="d-none">
+                        <td colspan="3">
+                            <table class="table table-sm mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Section ID</th>
+                                        <th>Professor ID</th>
+                                        <th>Current / Max Students</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sectionBody-@each.Course.CourseID">
+@foreach (var sect in each.Sections)
+{
+    <tr>
+                                            <td>@sect.SectionID</td>
+                                            <td>@sect.ProfID</td>
+                                            <td>@sect.numStudents / @sect.maxStudents</td>
+        <td class="text-end">
+            <button class="action-btn edit"><i class="fas fa-pen"></i></button>
+            <button class="action-btn delete"><i class="fas fa-trash"></i></button>
+        </td>
+    </tr>
+}
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="3" class="text-center">No courses found.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<form id="deleteForm" method="post" asp-controller="Course" asp-action="Delete">
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="deleteCourseId" name="id" value="" />
+</form>
+
+<form id="editForm" method="post" asp-controller="Course" asp-action="Edit">
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="editCourseId" name="id" value="" />
+</form>
+
+
+<script>
+        var allProf = @Html.Raw(Json.Serialize(ViewBag.allProf));
+    function toggleSections(courseId) {
+        const sectionRow = document.getElementById("sections-" + courseId);
+        sectionRow.classList.toggle("d-none");
+    }
+
+    function addSectionRow(courseId) {
+        const tbody = document.getElementById("sectionBody-" + courseId);
+        const row = document.createElement("tr");
+        row.classList.add("section-row", "section-input");
+        row.innerHTML = `
+            <td></td>
+            <td>
+                <select class="form-control">
+                    <option value="" hidden>Select Professor</option>
+                    ${allProf.map(prof => `<option value="${prof}">${prof}</option>`).join('')}
+                </select>
+            </td>
+            <td>0 / <input type="number" class="form-control" style="width:80px; display:inline-block" placeholder="Max" min=1 /></td>
+            <td class="text-end">
+                <button class="action-btn text-success" onclick="confirmAddSection(this)"><i class="fas fa-check"></i></button>
+                <button class="action-btn text-danger" onclick="cancelAddSection(this)"><i class="fas fa-times"></i></button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    }
+
+    async function confirmAddSection(btn) {
+        const row = btn.closest("tr");
+        var courseId = row.closest("tbody").id.replace("sectionBody-", "");
+        const inputs = row.querySelectorAll("input");
+        const profId = row.querySelector("select").value;
+        console.log(profId)
+        const maxStudents = inputs[0].value;
+    fetch('/section/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            CourseID: courseId,
+            ProfID: profId,
+            maxStudents: maxStudents,
+            numStudents: 0,
+            SectionId: ""
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Network response was not ok");
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data && data.sectionID) {
+            row.innerHTML = `
+                <td>${data.sectionID}</td>
+                <td>${profId}</td>
+                <td>0 / ${maxStudents}</td>
+                <td class="text-end">
+                    <button class="action-btn edit"><i class="fas fa-pen"></i></button>
+                    <button class="action-btn delete"><i class="fas fa-trash"></i></button>
+                </td>
+            `;
+        } else {
+            console.error("Section ID not received from server");
+            alert("Failed to add section");
+        }
+    })
+    .catch(error => {
+        console.error("There was a problem with the fetch operation:", error);
+    });
+    }
+
+    function cancelAddSection(btn) {
+        const row = btn.closest("tr");
+        row.remove();
+    }
+
+    function confirmDelete(courseId) {
+        if (confirm(`Are you sure you want to delete course "${courseId}"?`)) {
+            document.getElementById("deleteCourseId").value = courseId;
+            document.getElementById("deleteForm").submit();
+        }
+    }
+
+    function editCourse(courseId) {
+        document.getElementById("editCourseId").value = courseId;
+        document.getElementById("editForm").submit();
+    }
+
+    document.getElementById("courseSearch").addEventListener("input", function () {
+        const searchValue = this.value.toLowerCase();
+        const rows = document.querySelectorAll("#coursesTable tbody tr");
+
+        rows.forEach(row => {
+            const courseIdCell = row.cells[0];
+            const courseNameCell = row.cells[1];
+
+            if (courseIdCell && courseNameCell) {
+                const courseId = courseIdCell.textContent.toLowerCase();
+                const courseName = courseNameCell.textContent.toLowerCase();
+                row.style.display = (courseId.includes(searchValue) || courseName.includes(searchValue)) ? "" : "none";
+            }
+        });
+    });
+</script>

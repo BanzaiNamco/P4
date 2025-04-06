@@ -38,16 +38,16 @@
     }
     <form method="post" asp-controller="Course" asp-action="@formAction">
 
-        <div class="mb-3">
-            <label for="CourseID" class="form-label">Course ID</label>
-            <input type="text" class="form-control" id="CourseID" name="CourseID" value="@Model?.CourseID" maxlength="7" required
-            @(Model?.CourseID != null ? "readonly" : "") />
-        </div>
+         <div class="mb-3"> 
+             <label for="CourseID" class="form-label">Course ID</label> 
+             <input type="text" class="form-control" id="CourseID" name="CourseID" value="@Model?.CourseID" maxlength="7" required 
+                    @(Model?.CourseID != null ? "readonly" : "") /> 
+         </div> 
 
-        <div class="mb-3">
-            <label for="CourseName" class="form-label">Course Name</label>
-            <input type="text" class="form-control" id="CourseName" name="CourseName" value="@Model?.CourseName" required />
-        </div>
+         <div class="mb-3"> 
+             <label for="CourseName" class="form-label">Course Name</label> 
+             <input type="text" class="form-control" id="CourseName" name="CourseName" value="@Model?.CourseName" required /> 
+         </div> 
 
         <button type="submit" class="btn btn-primary btn-submit">
             @if (Model?.CourseID == null)

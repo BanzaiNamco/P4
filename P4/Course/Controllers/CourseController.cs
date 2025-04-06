@@ -10,7 +10,7 @@ namespace Course.Controllers
     public class CourseController : ControllerBase
     {
         private readonly ApplicationDbContext _dbContext;
-        public CourseController(ApplicationDbContext dbContext, ILogger<CourseController> logger)
+        public CourseController(ApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
         }

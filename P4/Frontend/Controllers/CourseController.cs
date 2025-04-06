@@ -26,7 +26,7 @@ namespace Frontend.Controllers
             if (string.IsNullOrEmpty(bearerToken))
             {
                 ModelState.AddModelError(string.Empty, "Authentication token is missing.");
-                return View(); // or return RedirectToAction("Login") if you want to redirect
+                return RedirectToAction("Index", "Login");
             }
 
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
@@ -34,19 +34,43 @@ namespace Frontend.Controllers
             {
                 var response = await client.GetAsync("https://localhost:8002/getAll");
 
-                if (response.IsSuccessStatusCode)
-                {
-                    var resultString = await response.Content.ReadAsStringAsync();
-
-                    var courses = JsonConvert.DeserializeObject<List<CourseModel>>(resultString);
-
-                    return View("Index", courses); // Pass to a strongly-typed view
-                }
-                else
+                if (!response.IsSuccessStatusCode)
                 {
                     ModelState.AddModelError(string.Empty, "Error fetching courses.");
-                    return View();
+                    return View("../Admin/Index", new List<CourseWithSectionModel>());
+
                 }
+                var resultString = await response.Content.ReadAsStringAsync();
+
+                var courses = JsonConvert.DeserializeObject<List<CourseModel>>(resultString);
+                var courseWithSectionLIst = new List<CourseWithSectionModel>();
+                // for each of course
+                foreach (var course in courses)
+                {
+                    var sections = await client.PostAsJsonAsync("https://localhost:8003/getByCourse", course.CourseID);
+                    if (sections.IsSuccessStatusCode)
+                    {
+                        var resultString2 = await sections.Content.ReadAsStringAsync();
+                        var sectionsList = JsonConvert.DeserializeObject<List<SectionModel>>(resultString2);
+                        courseWithSectionLIst.Add(new CourseWithSectionModel
+                        {
+                            Course = course,
+                            Sections = sectionsList
+                        });
+                    }
+                }
+                var url = "https://localhost:8001/getAllProf"; // URL without any query parameters
+
+                var getProfResponse = await client.GetAsync(url); // Use GetAsync for a GET request
+
+                if (!getProfResponse.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    return StatusCode((int)response.StatusCode, $"External API error: {errorContent}");
+                }
+                var allProf = await getProfResponse.Content.ReadFromJsonAsync<List<string>>();
+                ViewBag.allProf = allProf;
+                return View("../Admin/Index", courseWithSectionLIst);
             }
             catch (Exception ex)
             {
@@ -58,7 +82,7 @@ namespace Frontend.Controllers
         [Authorize(Roles = "admin")]
         public IActionResult Add()
         {
-            return View("add", new CourseModel());
+            return View("../admin/Add", new CourseModel());
         }
 
 
@@ -67,13 +91,12 @@ namespace Frontend.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(string id)
         {
-            _logger.LogInformation("Editing course with ID: {id}", id);
             var client = _httpClientFactory.CreateClient();
             var bearerToken = HttpContext.Session.GetString("JWToken");
             if (string.IsNullOrEmpty(bearerToken))
             {
                 ModelState.AddModelError(string.Empty, "Authentication token is missing.");
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", "Login");
             }
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
@@ -83,8 +106,7 @@ namespace Frontend.Controllers
                 {
                     var resultString = await response.Content.ReadAsStringAsync();
                     var course = JsonConvert.DeserializeObject<CourseModel>(resultString);
-                    _logger.LogInformation("Fetched course: {course}", course);
-                    return View("add", course);
+                    return View("../admin/Add", course);
                 }
                 else
                 {
@@ -103,18 +125,18 @@ namespace Frontend.Controllers
         public async Task<IActionResult> Add(CourseModel data)
         {
             if (!ModelState.IsValid)
-                return View("add", data);
+                return View("../admin/Add", data);
             if (string.IsNullOrEmpty(data.CourseName) || string.IsNullOrEmpty(data.CourseID))
             {
                 ModelState.AddModelError(string.Empty, "Name and ID are required.");
-                return View("add", data);
+                return View("../admin/Add", data);
             }
             var client = _httpClientFactory.CreateClient();
             var bearerToken = HttpContext.Session.GetString("JWToken");
             if (string.IsNullOrEmpty(bearerToken))
             {
                 ModelState.AddModelError(string.Empty, "Authentication token is missing.");
-                return View("add", data);
+                return RedirectToAction("Index", "Login");
             }
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
@@ -126,10 +148,10 @@ namespace Frontend.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Error adding user.");
+                    ModelState.AddModelError(string.Empty, "Course already added. Edit instead.");
                 }
 
-                return View("add", data);
+                return View("../admin/Add", data);
             }
             catch (Exception ex)
             {
@@ -152,7 +174,7 @@ namespace Frontend.Controllers
             if (string.IsNullOrEmpty(bearerToken))
             {
                 ModelState.AddModelError(string.Empty, "Authentication token is missing.");
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", "Login");
             }
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
@@ -179,34 +201,33 @@ namespace Frontend.Controllers
         public async Task<IActionResult> Save(CourseModel data)
         {
             if (!ModelState.IsValid)
-                return View("add", data);
+                return View("../admin/Add", data);
             if (string.IsNullOrEmpty(data.CourseName) || string.IsNullOrEmpty(data.CourseID))
             {
                 ModelState.AddModelError(string.Empty, "Name and ID are required.");
-                return View("add", data);
+                return View("../admin/Add", data);
             }
             var client = _httpClientFactory.CreateClient();
             var bearerToken = HttpContext.Session.GetString("JWToken");
             if (string.IsNullOrEmpty(bearerToken))
             {
                 ModelState.AddModelError(string.Empty, "Authentication token is missing.");
-                return View("add", data);
+                return RedirectToAction("Index", "Login");
             }
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
             {
                 var response = await client.PostAsJsonAsync("https://localhost:8002/save", data);
-                _logger.LogInformation("response: {response}", response);
                 if (response.IsSuccessStatusCode)
                 {
                     return RedirectToAction("Index");
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Error adding user.");
+                    ModelState.AddModelError(string.Empty, "Error editing user.");
                 }
 
-                return View("add", data);
+                return View("../admin/Add", data);
             }
             catch (Exception ex)
             {
