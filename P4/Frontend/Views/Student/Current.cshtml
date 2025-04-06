@@ -1,4 +1,4 @@
-@model List<CourseModel>
+@model List<EnlistRequestModel>
 @{
     ViewData["Title"] = "View Current Courses - ArcherHub";
 }
@@ -63,7 +63,7 @@
                 <div class="course-row">
                     <div class="d-flex justify-content-between">
                         <div class="course-info">
-                            <strong>@course.CourseID</strong> - @course.CourseName
+							<strong>@course.CourseID</strong> - Section @course.SectionID
                         </div>
                         <button class="action-btn minus" onclick="confirmRemoveCourse('@course.CourseID')">
                             <i class="fas fa-minus"></i>

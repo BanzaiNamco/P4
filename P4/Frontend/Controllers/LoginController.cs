@@ -44,6 +44,7 @@ namespace Frontend.Controllers
                 else
                 {
                     ModelState.AddModelError(string.Empty, "Invalid credentials.");
+                    return View("Index", data);
                 }
             }
             catch (Exception ex)
@@ -51,8 +52,6 @@ namespace Frontend.Controllers
                 ModelState.AddModelError(string.Empty, "Error connecting to the server.");
                 return View("Index", data);
             }
-
-            return View("Index", data);
         }
 
         [HttpPost]

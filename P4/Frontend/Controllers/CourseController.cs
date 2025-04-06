@@ -159,42 +159,42 @@ namespace Frontend.Controllers
             }
         }
 
-        [ValidateAntiForgeryToken]
-        [HttpPost]
-        [Authorize(Roles = "admin")]
-        public async Task<IActionResult> Delete(string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                ModelState.AddModelError(string.Empty, "Course ID is required.");
-                return RedirectToAction("Index");
-            }
-            var client = _httpClientFactory.CreateClient();
-            var bearerToken = HttpContext.Session.GetString("JWToken");
-            if (string.IsNullOrEmpty(bearerToken))
-            {
-                ModelState.AddModelError(string.Empty, "Authentication token is missing.");
-                return RedirectToAction("Index", "Login");
-            }
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
-            try
-            {
-                var response = await client.PostAsJsonAsync("https://localhost:8002/delete", id);
-                if (response.IsSuccessStatusCode)
-                {
-                    return RedirectToAction("Index");
-                }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Error deleting course.");
-                    return RedirectToAction("Index");
-                }
-            }
-            catch (Exception ex)
-            {
-                return this.RedirectWithError("Error connecting to the server.");
-            }
-        }
+        //[ValidateAntiForgeryToken]
+        //[HttpPost]
+        //[Authorize(Roles = "admin")]
+        //public async Task<IActionResult> Delete(string id)
+        //{
+        //    if (string.IsNullOrEmpty(id))
+        //    {
+        //        ModelState.AddModelError(string.Empty, "Course ID is required.");
+        //        return RedirectToAction("Index");
+        //    }
+        //    var client = _httpClientFactory.CreateClient();
+        //    var bearerToken = HttpContext.Session.GetString("JWToken");
+        //    if (string.IsNullOrEmpty(bearerToken))
+        //    {
+        //        ModelState.AddModelError(string.Empty, "Authentication token is missing.");
+        //        return RedirectToAction("Index", "Login");
+        //    }
+        //    client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
+        //    try
+        //    {
+        //        var response = await client.PostAsJsonAsync("https://localhost:8002/delete", id);
+        //        if (response.IsSuccessStatusCode)
+        //        {
+        //            return RedirectToAction("Index");
+        //        }
+        //        else
+        //        {
+        //            ModelState.AddModelError(string.Empty, "Error deleting course.");
+        //            return RedirectToAction("Index");
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return this.RedirectWithError("Error connecting to the server.");
+        //    }
+        //}
 
         [HttpPost]
         [Authorize(Roles = "admin")]
@@ -346,6 +346,13 @@ namespace Frontend.Controllers
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
             {
+                var response2 = await client.PostAsJsonAsync("https://localhost:8003/incrementSlots", sectionID);
+                if (!response2.IsSuccessStatusCode)
+                {
+                    TempData["ErrorMessage"] = "Error enrolling in course.";
+                    return RedirectToAction("Enlist");
+                }
+
                 _logger.LogInformation("Attempting to enlist in course: {CourseId}, section: {SectionId}", courseID, sectionID);
                 var body = new
                 {
@@ -363,6 +370,7 @@ namespace Frontend.Controllers
                     return RedirectToAction("Enlist");
                 }
                 _logger.LogInformation("Successfully enlisted in course: {CourseId}, section: {SectionId}", courseID, sectionID);
+
                 return Ok(new { success = true, message = "Course enlisted successfully!" });
             }
             catch (Exception ex)
@@ -372,5 +380,67 @@ namespace Frontend.Controllers
             }
         }
 
+        [HttpGet]
+        [Authorize(Roles = "student")]
+        public async Task<IActionResult> Enrolled()
+        {
+            var client = _httpClientFactory.CreateClient();
+            var bearerToken = HttpContext.Session.GetString("JWToken");
+
+            if (string.IsNullOrEmpty(bearerToken))
+            {
+                ModelState.AddModelError(string.Empty, "Authentication token is missing.");
+                return View("Index", "Login");
+            }
+
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
+            try
+            {
+                var response = await client.PostAsJsonAsync("https://localhost:8005/getEnrolledCourse", User.Identity.Name);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return this.RedirectWithError("Error fetching courses.");
+                }
+                var courseTaken = await response.Content.ReadFromJsonAsync<List<EnlistRequestModel>>();
+                return View("../Student/Current", courseTaken);
+            }
+            catch (Exception ex)
+            {
+                return this.RedirectWithError("Error connecting to the server.");
+
+            }
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "student")]
+        public async Task<IActionResult> All()
+        {
+            var client = _httpClientFactory.CreateClient();
+            var bearerToken = HttpContext.Session.GetString("JWToken");
+            if (string.IsNullOrEmpty(bearerToken))
+            {
+                ModelState.AddModelError(string.Empty, "Authentication token is missing.");
+                return View("Index", "Login");
+            }
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
+            try
+            {
+                var response = await client.GetAsync("https://localhost:8002/getAll");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    ModelState.AddModelError(string.Empty, "Error fetching courses.");
+                    return View("../Admin/Index", new List<CourseWithSectionModel>());
+
+                }
+                var resultString = await response.Content.ReadAsStringAsync();
+                var courses = JsonConvert.DeserializeObject<List<CourseModel>>(resultString);
+                return View("../Student/All", courses);
+            }
+            catch (Exception ex)
+            {
+                return this.RedirectWithError("Error connecting to the server.");
+            }
+        }
     }
 }

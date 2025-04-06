@@ -38,7 +38,7 @@ namespace Course.Controllers
             return Ok(new { message = "Course added successfully." });
         }
 
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "admin,student")]
         [HttpGet]
         public async Task<IActionResult> getAll()
         {
@@ -46,26 +46,26 @@ namespace Course.Controllers
             return Ok(courses);
         }
 
-        [Authorize(Roles = "admin")]
-        [HttpPost]
-        public async Task<IActionResult> delete([FromBody] string id)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest("Invalid course ID.");
-            }
+        //[Authorize(Roles = "admin")]
+        //[HttpPost]
+        //public async Task<IActionResult> delete([FromBody] string id)
+        //{
+        //    if (string.IsNullOrEmpty(id))
+        //    {
+        //        return BadRequest("Invalid course ID.");
+        //    }
 
-            var course = await _dbContext.Courses.FindAsync(id);
-            if (course == null)
-            {
-                return NotFound("Course not found.");
-            }
+        //    var course = await _dbContext.Courses.FindAsync(id);
+        //    if (course == null)
+        //    {
+        //        return NotFound("Course not found.");
+        //    }
 
-            _dbContext.Courses.Remove(course);
-            await _dbContext.SaveChangesAsync();
+        //    _dbContext.Courses.Remove(course);
+        //    await _dbContext.SaveChangesAsync();
 
-            return Ok(new { message = "Course deleted successfully." });
-        }
+        //    return Ok(new { message = "Course deleted successfully." });
+        //}
 
         [Authorize(Roles = "admin")]
         [HttpPost]

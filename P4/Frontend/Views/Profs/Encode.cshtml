@@ -1,122 +1,173 @@
-@* @model List<StudentGradeModel> *@
-@* @{ *@
-@*     ViewData["Title"] = "Encode Grades - ArcherHub"; *@
-@* } *@
+@model List<StudentGradeModel>
+@{
+    ViewData["Title"] = "Encode Grades - ArcherHub";
+}
 
-@* <style> *@
-@*     body { *@
-@*         background: linear-gradient(135deg, #e0f7fa, #ffffff); *@
-@*         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; *@
-@*     } *@
+<!-- Grade Options (JavaScript array) -->
+<script>
+    const validGrades = ["0.0", "1.0", "1.5", "2.0", "2.5", "3.0", "3.5", "4.0", "NGS"];
+</script>
 
-@*     .grades-table-container { *@
-@*         max-width: 900px; *@
-@*         margin: 0 auto; *@
-@*         background-color: #ffffff; *@
-@*         border-radius: 15px; *@
-@*         padding: 20px; *@
-@*         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); *@
-@*     } *@
+<!-- Styles -->
+<style>
+    body {
+        background: linear-gradient(135deg, #e0f7fa, #ffffff);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-@*     .grades-table th, .grades-table td { *@
-@*         padding: 10px; *@
-@*         text-align: center; *@
-@*     } *@
+    .grades-table-container {
+        max-width: 900px;
+        margin: 40px auto;
+        background-color: #ffffff;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
 
-@*     .grades-table th { *@
-@*         background-color: #f8f9fa; *@
-@*     } *@
+    .grades-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-@*     .grades-table td input { *@
-@*         width: 80px; *@
-@*     } *@
+        .grades-table th, .grades-table td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #dee2e6;
+        }
 
-@*     .action-btn { *@
-@*         border: none; *@
-@*         background: none; *@
-@*         padding: 5px 10px; *@
-@*         font-size: 1.2rem; *@
-@*         cursor: pointer; *@
-@*         transition: color 0.2s ease; *@
-@*     } *@
+        .grades-table th {
+            background-color: #f8f9fa;
+        }
 
-@*     .action-btn.save { *@
-@*         color: #28a745; *@
-@*     } *@
+        .grades-table td input, .grades-table td select {
+            width: 100px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+        }
 
-@*     .action-btn.save:hover { *@
-@*         color: #218838; *@
-@*     } *@
+    .action-btn {
+        border: none;
+        background: none;
+        padding: 8px 16px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
 
-@*     .form-container { *@
-@*         display: flex; *@
-@*         justify-content: space-between; *@
-@*         align-items: center; *@
-@*         gap: 1rem; *@
-@*     } *@
-@* </style> *@
+        .action-btn.save {
+            color: #28a745;
+        }
 
-@* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" /> *@
+            .action-btn.save:hover {
+                color: #218838;
+            }
 
-@* <div class="grades-table-container"> *@
-@*     <h3>Encode Grades for Section @ViewData["SectionID"]</h3> *@
-@*     <div id="studentsGradesList"> *@
-@*         <table class="table grades-table"> *@
-@*             <thead class="table-light"> *@
-@*                 <tr> *@
-@*                     <th>Student ID</th> *@
-@*                     <th>Grade</th> *@
-@*                 </tr> *@
-@*             </thead> *@
-@*             <tbody> *@
-@*                 @foreach (var student in Model) *@
-@*                 { *@
-@*                     <tr> *@
-@*                         <td>@student.StudentID</td> *@
-@*                         <td> *@
-@*                             <input type="text" class="form-control grade-input" id="grade_@student.StudentID" value="@student.Grade" maxlength="3" /> *@
-@*                         </td> *@
-@*                     </tr> *@
-@*                 } *@
-@*             </tbody> *@
-@*         </table> *@
-@*     </div> *@
+    .form-container {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 20px;
+    }
+</style>
 
-@*     <div class="form-container"> *@
-@*         <button class="action-btn save" onclick="saveGrades()"> *@
-@*             <i class="fas fa-save"></i> Save Grades *@
-@*         </button> *@
-@*     </div> *@
-@* </div> *@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
 
-@* <script> *@
-@*     // Define valid grade values *@
-@*     const validGrades = ["0.0", "1.0", "1.5", "2.0", "2.5", "3.0", "3.5", "4.0"]; *@
+<!-- Grades Form -->
+<div class="grades-table-container">
+    <h3>Encode Grades for Section @ViewData["SectionID"]</h3>
+    <div id="studentsGradesList">
+        <table class="table grades-table">
+            <thead class="table-light">
+                <tr>
+                    <th>Student ID</th>
+                    <th>Grade</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var student in Model)
+                {
+                    <tr>
+                        <td>@student.StudentID</td>
+                        <td>
+                            <select class="form-control grade-input"
+                                    id="grade_@student.StudentID"
+                                    data-student-id="@student.StudentID"
+                                    data-grade-value="@student.GradeValue">
+                                <!-- Options will be added via JS -->
+                            </select>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 
-@*     // Save the grades function *@
-@*     function saveGrades() { *@
-@*         const gradesData = []; *@
+    <div class="form-container">
+        <button class="action-btn save" onclick="saveGrades()">
+            <i class="fas fa-save"></i> Save Grades
+        </button>
+    </div>
+</div>
 
-@*         // Collect all grades data *@
-@*         document.querySelectorAll(".grade-input").forEach(input => { *@
-@*             const studentID = input.id.split("_")[1]; *@
-@*             const grade = input.value; *@
+<!-- Scripts -->
+<script>
+    // Populate grade dropdowns on page load
+    window.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.grade-input').forEach(selectElement => {
+            const currentGrade = selectElement.dataset.gradeValue;
 
-@*             // Validate grade *@
-@*             if (!validGrades.includes(grade)) { *@
-@*                 alert(`Invalid grade for Student ID ${studentID}. Please enter a valid grade.`); *@
-@*                 return; *@
-@*             } *@
+            validGrades.forEach(grade => {
+                const option = document.createElement('option');
+                option.value = grade;
+                option.textContent = grade;
 
-@*             gradesData.push({ StudentID: studentID, Grade: grade }); *@
-@*         }); *@
+                if (currentGrade === grade || (grade === "NGS" && currentGrade === "5")) {
+                    option.selected = true;
+                }
 
-@*         // Send data to server (Assuming you have a POST endpoint to save the grades) *@
-@*         if (gradesData.length > 0) { *@
-@*             // Make an AJAX request or submit the form to save the grades *@
-@*             alert("Grades saved successfully!"); *@
-@*             // Example: Call your controller action here *@
-@*             // $.post('/Grades/SaveGrades', { grades: gradesData }); *@
-@*         } *@
-@*     } *@
-@* </script> *@
+                selectElement.appendChild(option);
+            });
+        });
+    });
+
+    // Save Grades
+    function saveGrades() {
+        const rows = document.querySelectorAll(".grades-table tbody tr");
+        const grades = [];
+
+        rows.forEach(row => {
+            const studentId = row.querySelector("td").innerText.trim();
+            const gradeSelect = row.querySelector(".grade-input");
+            let grade = gradeSelect.value;
+
+            if (grade === "NGS") {
+                grade = "5.0";
+            }
+
+            grades.push({
+                StudentID: studentId,
+                GradeValue: grade
+            });
+        });
+        console.log(grades)
+         fetch("/grade/save", { 
+             method: "POST", 
+             headers: { 
+                 "Content-Type": "application/json" 
+             }, 
+             body: JSON.stringify(grades) 
+         }) 
+         .then(response => response.json()) 
+         .then(data => { 
+             if (data.success) { 
+                 alert("Grades saved successfully!"); 
+             } else { 
+                 alert("Failed to save grades."); 
+             } 
+         }) 
+         .catch(error => { 
+             console.error("Error:", error); 
+             alert("An error occurred while saving grades."); 
+         }); 
+    }
+</script>

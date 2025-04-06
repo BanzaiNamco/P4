@@ -88,11 +88,15 @@
          } 
      </div> 
  </div> 
+<form id="encodeForm" method="post" asp-controller="Grade" asp-action="Encode">
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="encodeSectionID" name="id" value="" />
+</form>
 
  <script> 
      function proceedToEncodeGrades(courseID) { 
-         const selectedSection = document.getElementById("sectionDropdown_" + courseID).value; 
-
-         window.location.href = '/GradeEntry/EncodeGrades?courseID=' + courseID + '&sectionID=' + selectedSection; 
+        const selectedSection = document.getElementById("sectionDropdown_" + courseID).value;
+		document.getElementById("encodeSectionID").value = selectedSection;
+	    document.getElementById("encodeForm").submit();
      } 
  </script>

@@ -88,15 +88,16 @@
                             <button class="action-btn" onclick="toggleSections('@each.Course.CourseID')">
                                 <i class="fas fa-chevron-down"></i>
                             </button>
-                            <button class="action-btn add" onclick="addSectionRow('@each.Course.CourseID')">
-                                <i class="fas fa-plus"></i>
-                            </button>
                             <a href="javascript:void(0);" onclick="editCourse('@each.Course.CourseID')" class="action-btn edit" title="Edit">
                                 <i class="fas fa-pen"></i>
                             </a>
-                            <a href="javascript:void(0);" onclick="confirmDelete('@each.Course.CourseID')" class="action-btn delete" title="Delete">
-                                <i class="fas fa-trash"></i>
-                            </a>
+                            <button class="action-btn add" onclick="addSectionRow('@each.Course.CourseID')">
+                                <i class="fas fa-plus"></i>
+                            </button>
+
+                            @* <a href="javascript:void(0);" onclick="confirmDelete('@each.Course.CourseID')" class="action-btn delete" title="Delete"> *@
+                            @*     <i class="fas fa-trash"></i> *@
+                            @* </a> *@
                         </td>
                     </tr>
                     <tr id="sections-@each.Course.CourseID" class="d-none">
@@ -139,10 +140,10 @@
     </table>
 </div>
 
-<form id="deleteForm" method="post" asp-controller="Course" asp-action="Delete">
-    @Html.AntiForgeryToken()
-    <input type="hidden" id="deleteCourseId" name="id" value="" />
-</form>
+@* <form id="deleteForm" method="post" asp-controller="Course" asp-action="Delete"> *@
+@*     @Html.AntiForgeryToken() *@
+@*     <input type="hidden" id="deleteCourseId" name="id" value="" /> *@
+@* </form> *@
 
 <form id="editForm" method="post" asp-controller="Course" asp-action="Edit">
     @Html.AntiForgeryToken()
@@ -161,6 +162,10 @@
         const tbody = document.getElementById("sectionBody-" + courseId);
         const row = document.createElement("tr");
         row.classList.add("section-row", "section-input");
+        const sectionRow = document.getElementById("sections-" + courseId);
+        if (sectionRow.classList.contains("d-none")) {
+            toggleSections(courseId);
+        }
         row.innerHTML = `
             <td></td>
             <td>
@@ -230,12 +235,12 @@
         row.remove();
     }
 
-    function confirmDelete(courseId) {
-        if (confirm(`Are you sure you want to delete course "${courseId}"?`)) {
-            document.getElementById("deleteCourseId").value = courseId;
-            document.getElementById("deleteForm").submit();
-        }
-    }
+    // function confirmDelete(courseId) {
+    //     if (confirm(`Are you sure you want to delete course "${courseId}"?`)) {
+    //         document.getElementById("deleteCourseId").value = courseId;
+    //         document.getElementById("deleteForm").submit();
+    //     }
+    // }
 
     function editCourse(courseId) {
         document.getElementById("editCourseId").value = courseId;

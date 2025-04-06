@@ -123,15 +123,13 @@
             body: JSON.stringify({
                 courseID: courseID,
                 sectionID: sectionID
-            })
+            })  
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                console.log("succes")
                 alert('Course enlisted successfully!');
             } else {
-                console.log("fail")
                 alert('Failed to enlist in course.');
             }
         })

@@ -93,5 +93,27 @@ namespace Section.Controllers
                 .ToListAsync();
             return Ok(sections);
         }
+
+        [Authorize(Roles = "student")]
+        [HttpPost]
+        public async Task<IActionResult> incrementSlots([FromBody] string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("Invalid section ID.");
+            }
+            var section = await _dbContext.Sections.FindAsync(id);
+            if (section == null)
+            {
+                return NotFound("Section not found.");
+            }
+            if (section.numStudents >= section.maxStudents)
+            {
+                return BadRequest("No available slots.");
+            }
+            section.numStudents++;
+            await _dbContext.SaveChangesAsync();
+            return Ok(section);
+        }
     }
 }
