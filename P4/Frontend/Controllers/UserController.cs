@@ -16,7 +16,7 @@ namespace Frontend.Controllers
         [Authorize(Roles = "admin")]
         public IActionResult Add()
         {
-            return View("add");
+            return View("Add");
         }
 
         [HttpPost]
@@ -24,7 +24,7 @@ namespace Frontend.Controllers
         public async Task<IActionResult> Add(UserModel data)
         {
             if (!ModelState.IsValid)
-                return View("add", data);
+                return View("Add", data);
 
             var client = _httpClientFactory.CreateClient();
             var bearerToken = HttpContext.Session.GetString("JWToken");
@@ -32,7 +32,7 @@ namespace Frontend.Controllers
             if (string.IsNullOrEmpty(bearerToken))
             {
                 ModelState.AddModelError(string.Empty, "Authentication token is missing.");
-                return View("add", data);
+                return View("Add", data);
             }
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
@@ -49,7 +49,7 @@ namespace Frontend.Controllers
                     ModelState.AddModelError(string.Empty, "Error adding user.");
                 }
 
-                return View("add", data);
+                return View("Add", data);
             }
             catch (Exception ex)
             {

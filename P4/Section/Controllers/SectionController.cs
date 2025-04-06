@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Section.Data;
+using Section.Models;
 
 namespace Section.Controllers
 {
@@ -79,5 +80,18 @@ namespace Section.Controllers
             return Ok(sections);
         }
 
+        [Authorize(Roles = "student")]
+        [HttpPost]
+        public async Task<IActionResult> getAvailableSections([FromBody] CourseWithSection data)
+        {
+            if (data == null || string.IsNullOrEmpty(data.CourseID))
+            {
+                return BadRequest("Invalid data.");
+            }
+            var sections = await _dbContext.Sections
+                .Where(s => s.CourseID == data.CourseID && s.numStudents < s.maxStudents && !data.sections.Contains(s.SectionID))
+                .ToListAsync();
+            return Ok(sections);
+        }
     }
 }

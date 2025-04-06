@@ -105,6 +105,23 @@ namespace Course.Controllers
             return Ok(new { message = "Course updated successfully." });
         }
 
+        [Authorize(Roles = "student")]
+        [HttpPost]
+        public async Task<IActionResult> getAvailableCourses([FromBody] List<String> data)
+        {
+            if (data == null)
+            {
+                return BadRequest("Invalid data.");
+            }
+            var courses = await _dbContext.Courses
+                .Where(c => !data.Contains(c.CourseID))
+                .Select(c => c.CourseID)
+                .ToListAsync();
+            return Ok(courses);
+        }
+
+
+
     }
 
 

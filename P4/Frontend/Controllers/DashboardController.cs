@@ -9,18 +9,16 @@ namespace Frontend.Controllers
     public class DashboardController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ILogger<DashboardController> _logger;
-        public DashboardController(IHttpClientFactory httpClientFactory, ILogger<DashboardController> logger)
+        public DashboardController(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
-            _logger = logger;
         }
         public async Task<IActionResult> Index()
         {
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
             if (TempData["ErrorMessage"] != null)
             {
-                ModelState.AddModelError(string.Empty, "Error connecting to the server.");
+                ModelState.AddModelError(string.Empty, (string)TempData["ErrorMessage"]);
             }
             if (string.IsNullOrEmpty(role))
             {
@@ -35,36 +33,52 @@ namespace Frontend.Controllers
                 if (string.IsNullOrEmpty(bearerToken))
                 {
                     ModelState.AddModelError(string.Empty, "Authentication token is missing.");
-                    return View();
+                    return View("Index", "Login");
                 }
 
                 client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
                 try
                 {
-                    var response = await client.PostAsJsonAsync("https://localhost:8003/getByProf", new { ProfID = User.Identity.Name });
-                    _logger.LogInformation("Response: {response}", response);
+                    var response = await client.PostAsJsonAsync("https://localhost:8003/getByProf", User.Identity.Name);
                     if (!response.IsSuccessStatusCode)
                     {
                         ModelState.AddModelError(string.Empty, "Error fetching courses.");
-                        return View("prof");
+                        return View("Prof");
                     }
                     var resultString = await response.Content.ReadAsStringAsync();
                     var sections = JsonConvert.DeserializeObject<List<SectionModel>>(resultString);
-                    return View("prof", sections);
+                    var courseWithSectionLIst = new List<CourseWithSectionModel>();
+
+                    var uniqueCourseIDs = sections.Select(s => s.CourseID).Distinct().ToList();
+                    foreach (var courseID in uniqueCourseIDs)
+                    {
+                        var course = new CourseModel
+                        {
+                            CourseID = courseID,
+                            CourseName = ""
+                        };
+                        var sectionsForCourse = sections.Where(s => s.CourseID == courseID).ToList();
+                        courseWithSectionLIst.Add(new CourseWithSectionModel
+                        {
+                            Course = course,
+                            Sections = sectionsForCourse
+                        });
+                    }
+                    return View("Prof", courseWithSectionLIst);
                 }
                 catch (Exception ex)
                 {
                     ModelState.AddModelError(string.Empty, "Error fetching courses.");
-                    return View("prof");
+                    return View("Prof");
                 }
             }
             else if (role == "admin")
             {
-                return View("admin");
+                return View("Admin");
             }
             else if (role == "student")
             {
-                return View("student");
+                return View("Student");
             }
             else
             {

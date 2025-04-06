@@ -1,4 +1,4 @@
-@model List<CourseModel>
+@model List<CourseWithSectionModel>
 @{
     ViewData["Title"] = "ArcherHub";
 }
@@ -74,24 +74,27 @@
     <div id="coursesList">
         @if (Model != null && Model.Any())
         {
-            foreach (var course in Model)
+            foreach (var each in Model)
             {
                 <div class="course-row">
                     <div class="d-flex justify-content-between">
                         <div class="course-info">
-                            <strong>@course.CourseID</strong> - @course.CourseName
+                            <strong>@each.Course.CourseID</strong> 
                         </div>
-                        <button class="btn btn-info" onclick="toggleSections('@course.CourseID')">View Sections</button>
+                        <button class="btn btn-info" onclick="toggleSections('@each.Course.CourseID')">View Sections</button>
                     </div>
 
                     <!-- Dropdown for sections -->
-                    <div class="section-dropdown" id="sections-@course.CourseID">
-                            <div class="d-flex justify-content-between">
-                                <span>section.SectionName</span>
-                                <button class="action-btn plus" onclick="enlistCourse('course.CourseID', 'section.SectionID')">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
+                    <div class="section-dropdown" id="sections-@each.Course.CourseID">
+                        @foreach (var sect in @each.Sections)
+                        {
+                        <div class="d-flex justify-content-between">
+                            <span>@sect.SectionID</span>
+                            <button class="action-btn plus" onclick="enlistCourse('@each.Course.CourseID', '@sect.SectionID')">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        }
                     </div>
                 </div>
             }
@@ -112,7 +115,6 @@
 
     // Function to enlist the course for the student (you may need an AJAX call or form submission here)
     function enlistCourse(courseID, sectionID) {
-        // Example AJAX request to add course
         fetch('/Course/Enlist', {
             method: 'POST',
             headers: {
@@ -126,8 +128,10 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                console.log("succes")
                 alert('Course enlisted successfully!');
             } else {
+                console.log("fail")
                 alert('Failed to enlist in course.');
             }
         })
