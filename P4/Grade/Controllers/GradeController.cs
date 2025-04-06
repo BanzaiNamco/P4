@@ -145,5 +145,24 @@ namespace Grade.Controllers
 
         }
 
+        [Authorize(Roles = "admin")]
+        [HttpPost]
+        public async Task<IActionResult> deleteSection([FromBody] string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("Invalid section ID.");
+            }
+            // delete all grades with section = id
+            var grades = await _dbContext.Grades
+                .Where(g => g.SectionID == id)
+                .ToListAsync();
+            if (grades.Any())
+            {
+                _dbContext.Grades.RemoveRange(grades);
+                await _dbContext.SaveChangesAsync();
+            }
+            return Ok(new { message = "Section deleted successfully." });
+        }
     }
 }

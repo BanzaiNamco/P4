@@ -115,5 +115,23 @@ namespace Section.Controllers
             await _dbContext.SaveChangesAsync();
             return Ok(section);
         }
+
+        [Authorize(Roles = "admin")]
+        [HttpPost]
+        public async Task<IActionResult> delete([FromBody] string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("Invalid section ID.");
+            }
+            var section = await _dbContext.Sections.FindAsync(id);
+            if (section == null)
+            {
+                return NotFound("Section not found.");
+            }
+            _dbContext.Sections.Remove(section);
+            await _dbContext.SaveChangesAsync();
+            return Ok(new { message = "Section deleted successfully." });
+        }
     }
 }

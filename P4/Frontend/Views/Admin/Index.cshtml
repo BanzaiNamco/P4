@@ -114,13 +114,12 @@
                                 <tbody id="sectionBody-@each.Course.CourseID">
 @foreach (var sect in each.Sections)
 {
-    <tr>
+    <tr id>
                                             <td>@sect.SectionID</td>
                                             <td>@sect.ProfID</td>
                                             <td>@sect.numStudents / @sect.maxStudents</td>
         <td class="text-end">
-            <button class="action-btn edit"><i class="fas fa-pen"></i></button>
-            <button class="action-btn delete"><i class="fas fa-trash"></i></button>
+            <button class="action-btn delete" onclick="deleteSection(this,'@sect.SectionID')"><i class="fas fa-trash"></i></button>
         </td>
     </tr>
 }
@@ -188,9 +187,16 @@
         var courseId = row.closest("tbody").id.replace("sectionBody-", "");
         const inputs = row.querySelectorAll("input");
         const profId = row.querySelector("select").value;
-        console.log(profId)
+		if (inputs[0].value == "" || profId == "") {
+			alert("Please fill all fields");
+			return;
+		}
+		if (inputs[0].value <= 0) {
+			alert("Max students must be greater than 0");
+			return;
+		}
         const maxStudents = inputs[0].value;
-    fetch('/section/add', {
+    fetch('/Section/Add', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -211,15 +217,17 @@
     })
     .then(data => {
         if (data && data.sectionID) {
-            row.innerHTML = `
-                <td>${data.sectionID}</td>
-                <td>${profId}</td>
-                <td>0 / ${maxStudents}</td>
-                <td class="text-end">
-                    <button class="action-btn edit"><i class="fas fa-pen"></i></button>
-                    <button class="action-btn delete"><i class="fas fa-trash"></i></button>
-                </td>
-            `;
+            row.classList.remove("section-input")
+            row.classList.remove("section-row")
+    row.innerHTML = `
+        <td>${data.sectionID}</td>
+        <td>${profId}</td>
+        <td>0 / ${maxStudents}</td>
+        <td class="text-end">
+            <button class="action-btn delete" onclick="deleteSection(this,'${data.sectionID}')"><i class="fas fa-trash"></i></button>
+        </td>
+    `;
+
         } else {
             console.error("Section ID not received from server");
             alert("Failed to add section");
@@ -234,6 +242,7 @@
         const row = btn.closest("tr");
         row.remove();
     }
+
 
     // function confirmDelete(courseId) {
     //     if (confirm(`Are you sure you want to delete course "${courseId}"?`)) {
@@ -262,4 +271,26 @@
             }
         });
     });
+
+	function deleteSection(btn, sectionId) {
+		if (confirm(`Are you sure you want to delete section "${sectionId}"?`)) {
+			fetch('/Section/Delete', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(sectionId)
+			})
+			.then(response => response.json())
+			.then(data => {
+				if (data.success) {
+					alert("Section deleted successfully");
+					btn.closest("tr").remove();
+				} else {
+					alert("Failed to delete section");
+				}
+			})
+			.catch(error => console.error("Error:", error));
+		}
+	}
 </script>
