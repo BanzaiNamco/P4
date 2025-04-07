@@ -1,0 +1,58 @@
+﻿@{
+    ViewData["Title"] = "ArcherHub";
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #e0f7fa, #ffffff);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .login-container {
+        max-width: 500px;
+        margin: 60px auto;
+        padding: 30px;
+        background-color: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    h1.display-4 {
+        color: #007bff;
+        margin-top: 40px;
+        font-weight: 600;
+    }
+
+    .btn-primary {
+        width: 100%;
+        background-color: #007bff;
+        border: none;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+</style>
+
+<div class="text-center">
+    <h1 class="display-4">Login</h1>
+</div>
+
+<div class="login-container">
+    <form method="post" asp-action="Login" asp-controller="Login">
+        <div class="form-group mt-2">
+            <label for="IDno">ID</label>
+            <input type="text" class="form-control" id="IDno" name="IDno" placeholder="Enter your ID number" required />
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="Password">Password</label>
+            <input type="password" class="form-control" id="Password" name="Password" placeholder="Enter password" required />
+        </div>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary btn-block">Login</button>
+        </div>
+    </form>
+</div>

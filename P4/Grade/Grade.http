@@ -1,0 +1,6 @@
+@Grade_HostAddress = http://localhost:5185
+
+GET {{Grade_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

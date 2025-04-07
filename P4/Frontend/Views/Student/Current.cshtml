@@ -1,0 +1,116 @@
+@model List<EnlistRequestModel>
+@{
+    ViewData["Title"] = "ArcherHub";
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #e0f7fa, #ffffff);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .action-bar {
+        margin: 40px auto 20px auto;
+        max-width: 900px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .courses-table-container {
+        max-width: 900px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .course-row {
+        padding: 10px 0;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .action-btn {
+        border: none;
+        background: none;
+        padding: 5px 10px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+    .action-btn.minus {
+        color: #dc3545;
+    }
+
+    .action-btn.minus:hover {
+        color: #bd2130;
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+
+<div class="courses-table-container">
+    <h3>Your Current Courses</h3>
+    <div id="coursesList">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var course in Model)
+            {
+                <div class="course-row">
+                    <div class="d-flex justify-content-between">
+                        <div class="course-info">
+							<strong>@course.CourseID</strong> - Section @course.SectionID
+                        </div>
+                        <button class="action-btn minus" onclick="confirmRemoveCourse(this,'@course.SectionID')">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="text-center">You are not enrolled in any courses.</p>
+        }
+    </div>
+</div>
+
+<script>
+    function confirmRemoveCourse(btn, sectionID) {
+        const isConfirmed = confirm('Are you sure you want to remove this course from your list?');
+
+        if (isConfirmed) {
+            removeCourse(btn, sectionID);
+        }
+    }
+
+    function removeCourse(btn, sectionID) {
+        fetch('/Section/Drop', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(
+                sectionID
+            )
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Course removed successfully!');
+                btn.closest('.course-row').remove();
+            } else {
+                alert('Failed to remove the course.');
+            }
+        })
+        .catch(error => 
+            {
+                console.error('Error:', error)
+                alert('Server Error. Please try again later.')
+            });
+    }
+</script>

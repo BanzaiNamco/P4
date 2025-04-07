@@ -1,0 +1,165 @@
+@model List<CourseWithSectionModel>
+@{
+    ViewData["Title"] = "ArcherHub";
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #e0f7fa, #ffffff);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .action-bar {
+        margin: 40px auto 20px auto;
+        max-width: 900px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .search-input {
+        max-width: 300px;
+    }
+
+    .courses-table-container {
+        max-width: 900px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .course-row {
+        padding: 10px 0;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .section-dropdown {
+        display: none;
+        margin-top: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+    }
+
+    .action-btn {
+        border: none;
+        background: none;
+        padding: 5px 10px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+    .action-btn.plus {
+        color: #28a745;
+    }
+
+    .action-btn.plus:hover {
+        color: #218838;
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+
+<div class="action-bar">
+    <input type="text" class="form-control search-input" id="courseSearch" placeholder="Search available courses..." />
+</div>
+
+<div class="courses-table-container">
+    <div id="coursesList">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var each in Model)
+            {
+                <div class="course-row">
+                    <div class="d-flex justify-content-between">
+                        <div class="course-info">
+                            <strong>@each.Course.CourseID</strong> 
+                        </div>
+                        <button class="btn btn-info" onclick="toggleSections('@each.Course.CourseID')">View Sections</button>
+                    </div>
+
+                    <div class="section-dropdown" id="sections-@each.Course.CourseID">
+                        <div class="section-header d-flex align-items-center justify-content-between px-2 py-2 fw-bold text-secondary border-bottom">
+                            <div class="flex-grow-1">Section ID</div>
+                            <div class="mx-3">Slots</div>
+                            <div>Action</div>
+                        </div>
+
+                        @foreach (var sect in @each.Sections)
+                        {
+                            <div class="section-row d-flex align-items-center justify-content-between px-2 py-2">
+                                <div class="flex-grow-1"><strong>@sect.SectionID</strong></div>
+                                <div class="text-muted mx-3">@sect.numStudents / @sect.maxStudents</div>
+                                <button class="action-btn plus" onclick="enlistCourse(this,'@each.Course.CourseID', '@sect.SectionID')">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                @* <button class="btn btn-success btn-sm" onclick="enlistCourse(this,'@each.Course.CourseID', '@sect.SectionID')"> *@
+                                @*     Enlist *@
+                                @* </button> *@
+                            </div>
+                        }
+                    </div>
+                    </div>
+            }
+        }
+        else
+        {
+            <p class="text-center">No courses available to enlist.</p>
+        }
+    </div>
+</div>
+
+<script>
+    function toggleSections(courseID) {
+        const sectionDiv = document.getElementById('sections-' + courseID);
+        sectionDiv.style.display = sectionDiv.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function enlistCourse(btn, courseID, sectionID) {
+        fetch('/Course/Enlist', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                courseID: courseID,
+                sectionID: sectionID
+            })  
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Course enlisted successfully!');
+                btn.closest('.course-row').remove();;
+            } else {
+                alert('Failed to enlist in course.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error)
+            alert('Server Error. Please try again later.')
+        });
+    }
+
+    document.getElementById("courseSearch").addEventListener("input", function () {
+        const searchValue = this.value.toLowerCase();
+        const courseRows = document.querySelectorAll(".course-row");
+
+        courseRows.forEach(row => {
+            const courseId = row.querySelector(".course-info strong").textContent.toLowerCase();
+            const courseName = row.querySelector(".course-info").textContent.toLowerCase();
+
+            if (courseId.includes(searchValue) || courseName.includes(searchValue)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    });
+</script>

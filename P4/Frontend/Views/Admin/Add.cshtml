@@ -1,0 +1,63 @@
+@model CourseModel
+
+@{
+    ViewData["Title"] = "ArcherHub";
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #e0f7fa, #ffffff);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .form-container {
+        max-width: 600px;
+        margin: 60px auto;
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-title {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .btn-submit {
+        display: block;
+        width: 100%;
+        margin-top: 20px;
+    }
+</style>
+
+<div class="form-container">
+    <h2 class="form-title">@ViewData["Title"]</h2>
+    @{
+        var formAction = Model?.CourseID == null ? "Add" : "Save";
+    }
+    <form method="post" asp-controller="Course" asp-action="@formAction">
+
+         <div class="mb-3"> 
+             <label for="CourseID" class="form-label">Course ID</label> 
+             <input type="text" class="form-control" id="CourseID" name="CourseID" value="@Model?.CourseID" maxlength="7" required 
+                    @(Model?.CourseID != null ? "readonly" : "") /> 
+         </div> 
+
+         <div class="mb-3"> 
+             <label for="CourseName" class="form-label">Course Name</label> 
+             <input type="text" class="form-control" id="CourseName" name="CourseName" value="@Model?.CourseName" required /> 
+         </div> 
+
+        <button type="submit" class="btn btn-primary btn-submit">
+            @if (Model?.CourseID == null)
+            {
+                <text>Add Course</text>
+            }
+            else
+            {
+                <text>Edit Course</text>
+            }
+        </button>
+    </form>
+</div>
