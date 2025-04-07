@@ -65,7 +65,7 @@
                         <div class="course-info">
 							<strong>@course.CourseID</strong> - Section @course.SectionID
                         </div>
-                        <button class="action-btn minus" onclick="confirmRemoveCourse('@course.CourseID')">
+                        <button class="action-btn minus" onclick="confirmRemoveCourse(this,'@course.SectionID')">
                             <i class="fas fa-minus"></i>
                         </button>
                     </div>
@@ -81,30 +81,30 @@
 
 <script>
     // Function to confirm removal of a course
-    function confirmRemoveCourse(courseID) {
+    function confirmRemoveCourse(btn, sectionID) {
         const isConfirmed = confirm('Are you sure you want to remove this course from your list?');
 
         if (isConfirmed) {
-            removeCourse(courseID);
+            removeCourse(btn, sectionID);
         }
     }
 
     // Function to remove the course (AJAX request or form submission)
-    function removeCourse(courseID) {
-        fetch('/Course/RemoveFromStudentCourses', {
+    function removeCourse(btn, sectionID) {
+        fetch('/Section/Drop', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                courseID: courseID
-            })
+            body: JSON.stringify(
+                sectionID
+            )
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 alert('Course removed successfully!');
-                location.reload(); // Reload the page to update the course list
+                btn.closest('.course-row').remove();
             } else {
                 alert('Failed to remove the course.');
             }

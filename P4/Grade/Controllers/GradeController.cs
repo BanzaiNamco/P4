@@ -164,5 +164,24 @@ namespace Grade.Controllers
             }
             return Ok(new { message = "Section deleted successfully." });
         }
+
+        [Authorize(Roles = "student")]
+        [HttpPost]
+        public async Task<IActionResult> drop([FromBody] string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("Invalid student ID.");
+            }
+            var grades = await _dbContext.Grades
+                .Where(g => g.StudentID == id)
+                .ToListAsync();
+            if (grades.Any())
+            {
+                _dbContext.Grades.RemoveRange(grades);
+                await _dbContext.SaveChangesAsync();
+            }
+            return Ok(new { message = "Student dropped successfully." });
+        }
     }
 }

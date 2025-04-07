@@ -84,19 +84,28 @@
                         <button class="btn btn-info" onclick="toggleSections('@each.Course.CourseID')">View Sections</button>
                     </div>
 
-                    <!-- Dropdown for sections -->
                     <div class="section-dropdown" id="sections-@each.Course.CourseID">
+                        <div class="section-header d-flex align-items-center justify-content-between px-2 py-2 fw-bold text-secondary border-bottom">
+                            <div class="flex-grow-1">Section ID</div>
+                            <div class="mx-3">Slots</div>
+                            <div>Action</div>
+                        </div>
+
                         @foreach (var sect in @each.Sections)
                         {
-                        <div class="d-flex justify-content-between">
-                            <span>@sect.SectionID</span>
-                            <button class="action-btn plus" onclick="enlistCourse(this,'@each.Course.CourseID', '@sect.SectionID')">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
+                            <div class="section-row d-flex align-items-center justify-content-between px-2 py-2">
+                                <div class="flex-grow-1"><strong>@sect.SectionID</strong></div>
+                                <div class="text-muted mx-3">@sect.numStudents / @sect.maxStudents</div>
+                                <button class="action-btn plus" onclick="enlistCourse(this,'@each.Course.CourseID', '@sect.SectionID')">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                @* <button class="btn btn-success btn-sm" onclick="enlistCourse(this,'@each.Course.CourseID', '@sect.SectionID')"> *@
+                                @*     Enlist *@
+                                @* </button> *@
+                            </div>
                         }
                     </div>
-                </div>
+                    </div>
             }
         }
         else
