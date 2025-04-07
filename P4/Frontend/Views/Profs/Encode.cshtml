@@ -1,14 +1,12 @@
 @model List<StudentGradeModel>
 @{
-    ViewData["Title"] = "Encode Grades - ArcherHub";
+    ViewData["Title"] = "ArcherHub";
 }
 
-<!-- Grade Options (JavaScript array) -->
 <script>
     const validGrades = ["0.0", "1.0", "1.5", "2.0", "2.5", "3.0", "3.5", "4.0", "NGS"];
 </script>
 
-<!-- Styles -->
 <style>
     body {
         background: linear-gradient(135deg, #e0f7fa, #ffffff);
@@ -31,7 +29,7 @@
 
         .grades-table th, .grades-table td {
             padding: 12px;
-            text-align: center; /* Center align the content within td */
+            text-align: center;
             border-bottom: 1px solid #dee2e6;
         }
 
@@ -44,7 +42,7 @@
             padding: 5px;
             border-radius: 5px;
             border: 1px solid #ced4da;
-            margin: 0 auto; /* Optional: centers the select if the text-align doesnt work */
+            margin: 0 auto; 
         }
 
     .action-btn {
@@ -73,7 +71,6 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
 
-<!-- Grades Form -->
 <div class="grades-table-container">
     <h3>Encode Grades for Section @ViewData["SectionID"]</h3>
     <div id="studentsGradesList">
@@ -94,7 +91,6 @@
                                     id="grade_@student.StudentID"
                                     data-student-id="@student.StudentID"
                                     data-grade-value="@student.GradeValue">
-                                <!-- Options will be added via JS -->
                             </select>
                         </td>
                     </tr>
@@ -110,9 +106,7 @@
     </div>
 </div>
 
-<!-- Scripts -->
 <script>
-    // Populate grade dropdowns on page load
     window.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.grade-input').forEach(selectElement => {
             const currentGrade = selectElement.dataset.gradeValue;
@@ -131,7 +125,6 @@
         });
     });
 
-    // Save Grades
     function saveGrades() {
         const rows = document.querySelectorAll(".grades-table tbody tr");
         const grades = [];

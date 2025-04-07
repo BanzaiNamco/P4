@@ -1,6 +1,6 @@
 @model List<EnlistRequestModel>
 @{
-    ViewData["Title"] = "View Current Courses - ArcherHub";
+    ViewData["Title"] = "ArcherHub";
 }
 
 <style>
@@ -80,7 +80,6 @@
 </div>
 
 <script>
-    // Function to confirm removal of a course
     function confirmRemoveCourse(btn, sectionID) {
         const isConfirmed = confirm('Are you sure you want to remove this course from your list?');
 
@@ -89,7 +88,6 @@
         }
     }
 
-    // Function to remove the course (AJAX request or form submission)
     function removeCourse(btn, sectionID) {
         fetch('/Section/Drop', {
             method: 'POST',

@@ -116,13 +116,11 @@
 </div>
 
 <script>
-    // Function to toggle sections visibility
     function toggleSections(courseID) {
         const sectionDiv = document.getElementById('sections-' + courseID);
         sectionDiv.style.display = sectionDiv.style.display === 'block' ? 'none' : 'block';
     }
 
-    // Function to enlist the course for the student (you may need an AJAX call or form submission here)
     function enlistCourse(btn, courseID, sectionID) {
         fetch('/Course/Enlist', {
             method: 'POST',
@@ -149,7 +147,6 @@
         });
     }
 
-    // Search functionality to filter courses
     document.getElementById("courseSearch").addEventListener("input", function () {
         const searchValue = this.value.toLowerCase();
         const courseRows = document.querySelectorAll(".course-row");

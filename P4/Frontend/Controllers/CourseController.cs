@@ -10,11 +10,9 @@ namespace Frontend.Controllers
     {
 
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ILogger<CourseController> _logger;
-        public CourseController(IHttpClientFactory httpClientFactory, ILogger<CourseController> logger)
+        public CourseController(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
-            _logger = logger;
         }
         [HttpGet]
         [Authorize(Roles = "admin")]
@@ -44,7 +42,6 @@ namespace Frontend.Controllers
 
                 var courses = JsonConvert.DeserializeObject<List<CourseModel>>(resultString);
                 var courseWithSectionLIst = new List<CourseWithSectionModel>();
-                // for each of course
                 foreach (var course in courses)
                 {
                     var sections = await client.PostAsJsonAsync("https://localhost:8003/getByCourse", course.CourseID);
@@ -64,9 +61,9 @@ namespace Frontend.Controllers
                         return View("../Admin/Index", new List<CourseWithSectionModel>());
                     }
                 }
-                var url = "https://localhost:8001/getAllProf"; // URL without any query parameters
+                var url = "https://localhost:8001/getAllProf";
 
-                var getProfResponse = await client.GetAsync(url); // Use GetAsync for a GET request
+                var getProfResponse = await client.GetAsync(url);
 
                 if (!getProfResponse.IsSuccessStatusCode)
                 {
@@ -255,27 +252,23 @@ namespace Frontend.Controllers
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
             {
-                _logger.LogInformation("Fetching passed courses for student: {StudentId}", User.Identity.Name);
                 var response = await client.PostAsJsonAsync("https://localhost:8005/getPassedCourses", User.Identity.Name);
                 if (!response.IsSuccessStatusCode)
                 {
                     return this.RedirectWithError("Error fetching courses.");
                 }
                 var courseTaken = await response.Content.ReadFromJsonAsync<List<string>>();
-                _logger.LogInformation("Fetching failed sections for student: {StudentId}", User.Identity.Name);
                 var response2 = await client.PostAsJsonAsync("https://localhost:8005/getFailedSections", User.Identity.Name);
                 if (!response2.IsSuccessStatusCode)
                 {
                     return this.RedirectWithError("Error fetching courses.");
                 }
                 var sectionsFailed = await response2.Content.ReadFromJsonAsync<List<string>>();
-                _logger.LogInformation("Fetching available courses for student: {StudentId}", User.Identity.Name);
                 var response3 = await client.PostAsJsonAsync("https://localhost:8002/getAvailableCourses", courseTaken);
                 if (!response3.IsSuccessStatusCode)
                 {
                     return this.RedirectWithError("Error fetching courses.");
                 }
-                _logger.LogInformation("Fetching available sections for student: {StudentId}", User.Identity.Name);
                 var availableCourses = await response3.Content.ReadFromJsonAsync<List<string>>();
                 var availableCourseWithSection = new List<CourseWithSectionModel>();
                 foreach (var each in availableCourses)
@@ -305,7 +298,6 @@ namespace Frontend.Controllers
                     }
 
                 }
-                _logger.LogInformation("Successfully fetched available courses and sections for student: {StudentId}", User.Identity.Name);
                 if (TempData["ErrorMessage"] != null)
                 {
                     ModelState.AddModelError(string.Empty, (string)TempData["ErrorMessage"]);
@@ -333,7 +325,6 @@ namespace Frontend.Controllers
             }
             var courseID = data.CourseID;
             var sectionID = data.SectionID;
-            _logger.LogInformation("Attempting to enlist in course: {CourseId}, section: {SectionId}", courseID, sectionID);
             if (string.IsNullOrEmpty(courseID) || string.IsNullOrEmpty(sectionID))
             {
                 TempData["ErrorMessage"] = "Course ID and Section ID are required.";
@@ -341,17 +332,14 @@ namespace Frontend.Controllers
             }
             var client = _httpClientFactory.CreateClient();
             var bearerToken = HttpContext.Session.GetString("JWToken");
-            _logger.LogInformation("Fetching authentication token for student: {StudentId}", User.Identity.Name);
             if (string.IsNullOrEmpty(bearerToken))
             {
                 ModelState.AddModelError(string.Empty, "Authentication token is missing.");
                 return RedirectToAction("Index", "Login");
             }
-            _logger.LogInformation("Setting authentication header for client.");
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
             {
-                _logger.LogInformation("Attempting to enlist in course: {CourseId}, section: {SectionId}", courseID, sectionID);
                 var body = new
                 {
                     Grade = new
@@ -365,20 +353,17 @@ namespace Frontend.Controllers
                     bearerToken = bearerToken
                 };
                 var response = await client.PostAsJsonAsync("https://localhost:8005/add", body);
-                _logger.LogInformation("Response from enlistment attempt: {StatusCode}", response.StatusCode);
                 if (!response.IsSuccessStatusCode)
                 {
                     TempData["ErrorMessage"] = "Error enrolling in course.";
                     return RedirectToAction("Enlist");
                 }
-                _logger.LogInformation("Successfully enlisted in course: {CourseId}, section: {SectionId}", courseID, sectionID);
 
                 return Ok(new { success = true, message = "Course enlisted successfully!" });
             }
             catch (Exception ex)
             {
                 return this.RedirectWithError("Error connecting to the server.");
-
             }
         }
 

@@ -12,12 +12,10 @@ namespace Grade.Controllers
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ILogger<GradeController> _logger;
-        public GradeController(ApplicationDbContext dbContext, IHttpClientFactory httpClientFactory, ILogger<GradeController> logger)
+        public GradeController(ApplicationDbContext dbContext, IHttpClientFactory httpClientFactory)
         {
             _dbContext = dbContext;
             _httpClientFactory = httpClientFactory;
-            _logger = logger;
         }
 
         [Authorize(Roles = "student")]
@@ -172,7 +170,6 @@ namespace Grade.Controllers
         [HttpPost]
         public async Task<IActionResult> deleteSection([FromBody] IDWithBearerToken data)
         {
-            _logger.LogInformation($"DeleteSection method called with ID: {data.ID}");
             if (string.IsNullOrEmpty(data.ID))
             {
                 return BadRequest("Invalid section ID.");
@@ -184,11 +181,9 @@ namespace Grade.Controllers
             var client = _httpClientFactory.CreateClient();
             var bearerToken = data.BearerToken;
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
-            _logger.LogInformation($"Bearer token: {bearerToken}");
             try
             {
                 var response = await client.PostAsJsonAsync("https://localhost:8003/delete", data.ID);
-                _logger.LogInformation($"Response status code: {response.StatusCode}");
                 if (!response.IsSuccessStatusCode)
                 {
                     return BadRequest("Failed to increment slots.");
@@ -213,10 +208,6 @@ namespace Grade.Controllers
         [HttpPost]
         public async Task<IActionResult> drop([FromBody] IDWithNameWithBearerToken data)
         {
-            _logger.LogInformation($"Drop method called with ID: {data.IDWithBearerToken.ID}");
-            _logger.LogInformation($"User name: {data.Name}");
-            _logger.LogInformation($"Bearer token: {data.IDWithBearerToken.BearerToken}");
-            _logger.LogInformation($"Data to be sent: {data.IDWithBearerToken.ID}");
             if (string.IsNullOrEmpty(data.IDWithBearerToken.ID))
             {
                 return BadRequest("Invalid section ID.");
@@ -232,12 +223,9 @@ namespace Grade.Controllers
             var client = _httpClientFactory.CreateClient();
             var bearerToken = data.IDWithBearerToken.BearerToken;
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
-            _logger.LogInformation($"Bearer token: {bearerToken}");
             try
             {
-                _logger.LogInformation($"Data to be sent: {data.IDWithBearerToken.ID}");
                 var response = await client.PostAsJsonAsync("https://localhost:8003/decrementSlots", data.IDWithBearerToken.ID);
-                _logger.LogInformation($"Response status code: {response.StatusCode}");
                 if (!response.IsSuccessStatusCode)
                 {
                     return BadRequest("Error decrement slots.");

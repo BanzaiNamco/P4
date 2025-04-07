@@ -11,7 +11,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(opt => opt.UseSqlite(builder
 );
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
-// Add JWT authentication to validate the token passed to this service.
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -19,23 +18,20 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    // For development, you can set RequireHttpsMetadata to false
     options.RequireHttpsMetadata = false;
     options.SaveToken = true;
 
-    // Use the same secret key and issuer/audience configuration from your Auth service
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"])), // Same Secret Key as in Auth
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"])),
         ValidateIssuer = true,
-        ValidIssuer = builder.Configuration["JWT:Issuer"], // Same Issuer as in Auth
+        ValidIssuer = builder.Configuration["JWT:Issuer"],
         ValidateAudience = true,
-        ValidAudience = builder.Configuration["JWT:Audience"] // Same Audience as in Auth
+        ValidAudience = builder.Configuration["JWT:Audience"]
     };
 });
 
-// Add Swagger to your Course service
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -62,18 +58,14 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-// Use Swagger UI to test your API (optional)
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// Enable HTTPS Redirection
 app.UseHttpsRedirection();
 
-// Use Authentication and Authorization middleware
-app.UseAuthentication(); // To validate the token in each request
-app.UseAuthorization();  // To check if the user has permission to access resources
+app.UseAuthentication();
+app.UseAuthorization();
 
-// Map controllers
 app.MapControllers();
 
 app.Run();

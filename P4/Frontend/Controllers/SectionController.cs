@@ -6,11 +6,9 @@ namespace Frontend.Controllers
     public class SectionController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ILogger<SectionController> _logger;
-        public SectionController(IHttpClientFactory httpClientFactory, ILogger<SectionController> logger)
+        public SectionController(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
-            _logger = logger;
         }
 
         [HttpPost]
@@ -19,12 +17,12 @@ namespace Frontend.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState); // Return BadRequest with validation errors
+                return BadRequest(ModelState);
             }
             if (string.IsNullOrEmpty(data.ProfID) || string.IsNullOrEmpty(data.CourseID) ||
                 data.maxStudents <= 0)
             {
-                return BadRequest("All fields are required."); // Return BadRequest with a message
+                return BadRequest("All fields are required.");
             }
 
             var client = _httpClientFactory.CreateClient();
@@ -44,7 +42,7 @@ namespace Frontend.Controllers
                 if (response.IsSuccessStatusCode)
                 {
 
-                    var responseData = await response.Content.ReadFromJsonAsync<dynamic>(); // Deserialize to a dynamic object
+                    var responseData = await response.Content.ReadFromJsonAsync<dynamic>();
                     return Ok(responseData);
                 }
                 else
@@ -63,7 +61,6 @@ namespace Frontend.Controllers
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete([FromBody] string id)
         {
-            _logger.LogInformation($"Delete method called with ID: {id}");
             if (string.IsNullOrEmpty(id))
             {
                 return BadRequest("Invalid section ID.");
@@ -79,8 +76,6 @@ namespace Frontend.Controllers
             try
             {
                 var data = new { bearerToken, id };
-                _logger.LogInformation($"Bearer token: {data.bearerToken}");
-                _logger.LogInformation($"Data to be sent: {data.id}");
                 var response = await client.PostAsJsonAsync("https://localhost:8005/deleteSection", data);
                 if (!response.IsSuccessStatusCode)
                 {
@@ -98,7 +93,6 @@ namespace Frontend.Controllers
         [Authorize(Roles = "student")]
         public async Task<IActionResult> Drop([FromBody] string id)
         {
-            _logger.LogInformation($"Drop method called with ID: {id}");
             if (string.IsNullOrEmpty(id))
             {
                 return BadRequest("Invalid section ID.");
