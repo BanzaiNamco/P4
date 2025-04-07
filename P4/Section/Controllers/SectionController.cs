@@ -11,9 +11,11 @@ namespace Section.Controllers
     public class SectionController : ControllerBase
     {
         private readonly ApplicationDbContext _dbContext;
-        public SectionController(ApplicationDbContext dbContext)
+        private readonly ILogger<SectionController> _logger;
+        public SectionController(ApplicationDbContext dbContext, ILogger<SectionController> logger)
         {
             _dbContext = dbContext;
+            _logger = logger;
         }
 
         [Authorize(Roles = "admin")]
@@ -120,6 +122,7 @@ namespace Section.Controllers
         [HttpPost]
         public async Task<IActionResult> decrementSlots([FromBody] string id)
         {
+            _logger.LogInformation($"DecrementSlots method called with ID: {id}");
             if (string.IsNullOrEmpty(id))
             {
                 return BadRequest("Invalid section ID.");
@@ -133,6 +136,7 @@ namespace Section.Controllers
             {
                 return BadRequest("No students to remove.");
             }
+            _logger.LogInformation($"Current number of students: {section.numStudents}");
             section.numStudents--;
             await _dbContext.SaveChangesAsync();
             return Ok(section);

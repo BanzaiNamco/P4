@@ -31,7 +31,7 @@
 
         .grades-table th, .grades-table td {
             padding: 12px;
-            text-align: center;
+            text-align: center; /* Center align the content within td */
             border-bottom: 1px solid #dee2e6;
         }
 
@@ -39,11 +39,12 @@
             background-color: #f8f9fa;
         }
 
-        .grades-table td input, .grades-table td select {
+        .grades-table td select {
             width: 100px;
             padding: 5px;
             border-radius: 5px;
             border: 1px solid #ced4da;
+            margin: 0 auto; /* Optional: centers the select if the text-align doesnt work */
         }
 
     .action-btn {
@@ -89,7 +90,7 @@
                     <tr>
                         <td>@student.StudentID</td>
                         <td>
-                            <select class="form-control grade-input"
+                            <select class="form-select grade-input"
                                     id="grade_@student.StudentID"
                                     data-student-id="@student.StudentID"
                                     data-grade-value="@student.GradeValue">
@@ -149,7 +150,11 @@
                 GradeValue: grade
             });
         });
-         fetch("/Grade/Save", { 
+        if (grades.length === 0) {
+            alert("No grades to save.");
+            return;
+        } 
+            fetch("/Grade/Save", { 
              method: "POST", 
              headers: { 
                  "Content-Type": "application/json" 

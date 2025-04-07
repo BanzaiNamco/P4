@@ -47,9 +47,8 @@ namespace Frontend.Controllers
                 else
                 {
                     ModelState.AddModelError(string.Empty, "Error adding user.");
+                    return View("Add", data);
                 }
-
-                return View("Add", data);
             }
             catch (Exception ex)
             {

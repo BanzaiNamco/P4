@@ -58,6 +58,11 @@ namespace Frontend.Controllers
                             Sections = sectionsList
                         });
                     }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, "Error fetching sections.");
+                        return View("../Admin/Index", new List<CourseWithSectionModel>());
+                    }
                 }
                 var url = "https://localhost:8001/getAllProf"; // URL without any query parameters
 
@@ -65,8 +70,8 @@ namespace Frontend.Controllers
 
                 if (!getProfResponse.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    return StatusCode((int)response.StatusCode, $"External API error: {errorContent}");
+                    ModelState.AddModelError(string.Empty, "Error fetching professors.");
+                    return View("../Admin/Index", new List<CourseWithSectionModel>());
                 }
                 var allProf = await getProfResponse.Content.ReadFromJsonAsync<List<string>>();
                 ViewBag.allProf = allProf;
@@ -148,7 +153,7 @@ namespace Frontend.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Course already added. Edit instead.");
+                    ModelState.AddModelError(string.Empty, "Course is already added. You may edit it instead.");
                 }
 
                 return View("../Admin/Add", data);
@@ -346,21 +351,18 @@ namespace Frontend.Controllers
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
             {
-                var response2 = await client.PostAsJsonAsync("https://localhost:8003/incrementSlots", sectionID);
-                if (!response2.IsSuccessStatusCode)
-                {
-                    TempData["ErrorMessage"] = "Error enrolling in course.";
-                    return RedirectToAction("Enlist");
-                }
-
                 _logger.LogInformation("Attempting to enlist in course: {CourseId}, section: {SectionId}", courseID, sectionID);
                 var body = new
                 {
-                    GradeID = "",
-                    SectionID = sectionID,
-                    CourseID = courseID,
-                    StudentID = User.Identity.Name,
-                    GradeValue = 5.0
+                    Grade = new
+                    {
+                        GradeID = "",
+                        SectionID = sectionID,
+                        CourseID = courseID,
+                        StudentID = User.Identity.Name,
+                        GradeValue = 5.0
+                    },
+                    bearerToken = bearerToken
                 };
                 var response = await client.PostAsJsonAsync("https://localhost:8005/add", body);
                 _logger.LogInformation("Response from enlistment attempt: {StatusCode}", response.StatusCode);

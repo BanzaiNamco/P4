@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ApplicationDbContext>(opt => opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 builder.Services.AddControllers();
-
+builder.Services.AddHttpClient();
 // Add JWT authentication to validate the token passed to this service.
 builder.Services.AddAuthentication(options =>
 {

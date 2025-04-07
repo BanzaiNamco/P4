@@ -78,14 +78,11 @@ namespace Frontend.Controllers
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
             {
-
-                var response = await client.PostAsJsonAsync("https://localhost:8003/delete", id);
+                var data = new { bearerToken, id };
+                _logger.LogInformation($"Bearer token: {data.bearerToken}");
+                _logger.LogInformation($"Data to be sent: {data.id}");
+                var response = await client.PostAsJsonAsync("https://localhost:8005/deleteSection", data);
                 if (!response.IsSuccessStatusCode)
-                {
-                    return BadRequest("Error deleting section.");
-                }
-                var response2 = await client.PostAsJsonAsync("https://localhost:8005/deleteSection", id);
-                if (!response2.IsSuccessStatusCode)
                 {
                     return BadRequest("Error deleting enrolled students.");
                 }
@@ -116,13 +113,17 @@ namespace Frontend.Controllers
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
             {
-                var response = await client.PostAsJsonAsync("https://localhost:8005/drop", User.Identity.Name);
-                if (!response.IsSuccessStatusCode)
+                var data = new
                 {
-                    return BadRequest("Error dropping section.");
-                }
-                var response2 = await client.PostAsJsonAsync("https://localhost:8003/decrementSlots", id);
-                if (!response2.IsSuccessStatusCode)
+                    IDWithBearerToken = new
+                    {
+                        bearerToken = bearerToken,
+                        id = id
+                    },
+                    Name = User.Identity.Name
+                };
+                var response = await client.PostAsJsonAsync("https://localhost:8005/drop", data);
+                if (!response.IsSuccessStatusCode)
                 {
                     return BadRequest("Error dropping section.");
                 }

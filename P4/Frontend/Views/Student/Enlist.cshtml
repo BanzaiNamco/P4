@@ -143,7 +143,10 @@
                 alert('Failed to enlist in course.');
             }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error:', error)
+            alert('Server Error. Please try again later.')
+        });
     }
 
     // Search functionality to filter courses

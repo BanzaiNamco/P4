@@ -195,6 +195,11 @@
 			alert("Max students must be greater than 0");
 			return;
 		}
+    if (isNaN(parseInt(inputs[0]))) {
+        alert("Max students must be a number");
+        return;
+    }
+
         const maxStudents = inputs[0].value;
     fetch('/Section/Add', {
         method: 'POST',
@@ -234,6 +239,7 @@
         }
     })
     .catch(error => {
+        alert('Server Error. Please try again later.')
         console.error("There was a problem with the fetch operation:", error);
     });
     }
@@ -290,7 +296,10 @@
 					alert("Failed to delete section");
 				}
 			})
-			.catch(error => console.error("Error:", error));
+			.catch(error => {
+                alert('Server Error. Please try again later.')
+                console.error("Error:", error)
+            });
 		}
 	}
 </script>
