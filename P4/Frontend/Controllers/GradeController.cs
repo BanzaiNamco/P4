@@ -40,8 +40,7 @@ namespace Frontend.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, $"Internal server error: {ex.Message}");
-                return View("Index", "Dashboard");
+                return this.RedirectWithError("Error connecting to the server.");
             }
 
         }
