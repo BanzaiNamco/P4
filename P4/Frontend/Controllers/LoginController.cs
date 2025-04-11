@@ -20,6 +20,10 @@ namespace Frontend.Controllers
             {
                 return RedirectToAction("Index", "Dashboard");
             }
+            if (TempData["ErrorMessage"] != null)
+            {
+                ModelState.AddModelError(string.Empty, (string)TempData["ErrorMessage"]);
+            }
 
             return View();
         }
@@ -43,14 +47,14 @@ namespace Frontend.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Invalid credentials.");
-                    return View("Index", data);
+                    TempData["ErrorMessage"] = "Invalid credentials.";
+                    return RedirectToAction("Index");
                 }
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, "Error connecting to the server.");
-                return View("Index", data);
+                TempData["ErrorMessage"] = "Error connecting to the server.";
+                return RedirectToAction("Index");
             }
         }
 
