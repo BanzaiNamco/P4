@@ -8,7 +8,6 @@ namespace Frontend.Controllers
 {
     public class CourseController : Controller
     {
-
         private readonly IHttpClientFactory _httpClientFactory;
         public CourseController(IHttpClientFactory httpClientFactory)
         {
@@ -30,7 +29,7 @@ namespace Frontend.Controllers
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
             {
-                var response = await client.GetAsync("https://localhost:8002/getAll");
+                var response = await client.GetAsync("http://localhost:8002/getAll");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -44,7 +43,7 @@ namespace Frontend.Controllers
                 var courseWithSectionLIst = new List<CourseWithSectionModel>();
                 foreach (var course in courses)
                 {
-                    var sections = await client.PostAsJsonAsync("https://localhost:8003/getByCourse", course.CourseID);
+                    var sections = await client.PostAsJsonAsync("http://localhost:8003/getByCourse", course.CourseID);
                     if (sections.IsSuccessStatusCode)
                     {
                         var resultString2 = await sections.Content.ReadAsStringAsync();
@@ -61,7 +60,7 @@ namespace Frontend.Controllers
                         return View("../Admin/Index", new List<CourseWithSectionModel>());
                     }
                 }
-                var url = "https://localhost:8001/getAllProf";
+                var url = "http://localhost:8001/getAllProf";
 
                 var getProfResponse = await client.GetAsync(url);
 
@@ -103,7 +102,7 @@ namespace Frontend.Controllers
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
             {
-                var response = await client.PostAsJsonAsync("https://localhost:8002/get", id);
+                var response = await client.PostAsJsonAsync("http://localhost:8002/get", id);
                 if (response.IsSuccessStatusCode)
                 {
                     var resultString = await response.Content.ReadAsStringAsync();
@@ -143,7 +142,7 @@ namespace Frontend.Controllers
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
             {
-                var response = await client.PostAsJsonAsync("https://localhost:8002/add", data);
+                var response = await client.PostAsJsonAsync("http://localhost:8002/add", data);
                 if (response.IsSuccessStatusCode)
                 {
                     return RedirectToAction("Index");
@@ -181,7 +180,7 @@ namespace Frontend.Controllers
         //    client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
         //    try
         //    {
-        //        var response = await client.PostAsJsonAsync("https://localhost:8002/delete", id);
+        //        var response = await client.PostAsJsonAsync("http://localhost:8002/delete", id);
         //        if (response.IsSuccessStatusCode)
         //        {
         //            return RedirectToAction("Index");
@@ -219,7 +218,7 @@ namespace Frontend.Controllers
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
             {
-                var response = await client.PostAsJsonAsync("https://localhost:8002/save", data);
+                var response = await client.PostAsJsonAsync("http://localhost:8002/save", data);
                 if (response.IsSuccessStatusCode)
                 {
                     return RedirectToAction("Index");
@@ -252,19 +251,19 @@ namespace Frontend.Controllers
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
             {
-                var response = await client.PostAsJsonAsync("https://localhost:8005/getPassedCourses", User.Identity.Name);
+                var response = await client.PostAsJsonAsync("http://localhost:8005/getPassedCourses", User.Identity.Name);
                 if (!response.IsSuccessStatusCode)
                 {
                     return this.RedirectWithError("Error fetching courses.");
                 }
                 var courseTaken = await response.Content.ReadFromJsonAsync<List<string>>();
-                var response2 = await client.PostAsJsonAsync("https://localhost:8005/getFailedSections", User.Identity.Name);
+                var response2 = await client.PostAsJsonAsync("http://localhost:8005/getFailedSections", User.Identity.Name);
                 if (!response2.IsSuccessStatusCode)
                 {
                     return this.RedirectWithError("Error fetching courses.");
                 }
                 var sectionsFailed = await response2.Content.ReadFromJsonAsync<List<string>>();
-                var response3 = await client.PostAsJsonAsync("https://localhost:8002/getAvailableCourses", courseTaken);
+                var response3 = await client.PostAsJsonAsync("http://localhost:8002/getAvailableCourses", courseTaken);
                 if (!response3.IsSuccessStatusCode)
                 {
                     return this.RedirectWithError("Error fetching courses.");
@@ -278,7 +277,7 @@ namespace Frontend.Controllers
                         CourseID = each,
                         sectionsFailed
                     };
-                    var repeatingResponse = await client.PostAsJsonAsync("https://localhost:8003/getAvailableSections", data);
+                    var repeatingResponse = await client.PostAsJsonAsync("http://localhost:8003/getAvailableSections", data);
                     if (!repeatingResponse.IsSuccessStatusCode)
                     {
                         return this.RedirectWithError("Error fetching courses.");
@@ -311,61 +310,61 @@ namespace Frontend.Controllers
             }
         }
 
-        [HttpPost]
-        [Authorize(Roles = "student")]
-        public async Task<IActionResult> Enlist([FromBody] EnlistRequestModel data)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            if (data == null)
-            {
-                return BadRequest("Invalid data.");
-            }
-            var courseID = data.CourseID;
-            var sectionID = data.SectionID;
-            if (string.IsNullOrEmpty(courseID) || string.IsNullOrEmpty(sectionID))
-            {
-                TempData["ErrorMessage"] = "Course ID and Section ID are required.";
-                return RedirectToAction("Enlist");
-            }
-            var client = _httpClientFactory.CreateClient();
-            var bearerToken = HttpContext.Session.GetString("JWToken");
-            if (string.IsNullOrEmpty(bearerToken))
-            {
-                ModelState.AddModelError(string.Empty, "Authentication token is missing.");
-                return RedirectToAction("Index", "Login");
-            }
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
-            try
-            {
-                var body = new
-                {
-                    Grade = new
-                    {
-                        GradeID = "",
-                        SectionID = sectionID,
-                        CourseID = courseID,
-                        StudentID = User.Identity.Name,
-                        GradeValue = 5.0
-                    },
-                    bearerToken = bearerToken
-                };
-                var response = await client.PostAsJsonAsync("https://localhost:8005/add", body);
-                if (!response.IsSuccessStatusCode)
-                {
-                    TempData["ErrorMessage"] = "Error enrolling in course.";
-                    return RedirectToAction("Enlist");
-                }
+         [HttpPost]
+ [Authorize(Roles = "student")]
+ public async Task<IActionResult> Enlist([FromBody] EnlistRequestModel data)
+ {
+     if (!ModelState.IsValid)
+     {
+         return BadRequest(ModelState);
+     }
+     if (data == null)
+     {
+         return BadRequest("Invalid data.");
+     }
+     var courseID = data.CourseID;
+     var sectionID = data.SectionID;
+     if (string.IsNullOrEmpty(courseID) || string.IsNullOrEmpty(sectionID))
+     {
+         TempData["ErrorMessage"] = "Course ID and Section ID are required.";
+         return BadRequest("Course ID and Section ID are required.");
+     }
+     var client = _httpClientFactory.CreateClient();
+     var bearerToken = HttpContext.Session.GetString("JWToken");
+     if (string.IsNullOrEmpty(bearerToken))
+     {
+         ModelState.AddModelError(string.Empty, "Authentication token is missing.");
+         return BadRequest("Authentication token is missing.");
+     }
+     client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
+     try
+     {
+         var body = new
+         {
+             Grade = new
+             {
+                 GradeID = "",
+                 SectionID = sectionID,
+                 CourseID = courseID,
+                 StudentID = User.Identity.Name,
+                 GradeValue = 5.0
+             },
+             bearerToken = bearerToken
+         };
+         var response = await client.PostAsJsonAsync("http://localhost:8005/add", body);
+         if (!response.IsSuccessStatusCode)
+         {
+             TempData["ErrorMessage"] = "Error enrolling in course.";
+             return BadRequest("Error enrolling in course.");
+         }
 
-                return Ok(new { success = true, message = "Course enlisted successfully!" });
-            }
-            catch (Exception ex)
-            {
-                return this.RedirectWithError("Error connecting to the server.");
-            }
-        }
+         return Ok(new { success = true, message = "Course enlisted successfully!" });
+     }
+     catch (Exception ex)
+     {
+         return BadRequest(ex.Message);
+     }
+ }
 
         [HttpGet]
         [Authorize(Roles = "student")]
@@ -383,7 +382,7 @@ namespace Frontend.Controllers
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
             {
-                var response = await client.PostAsJsonAsync("https://localhost:8005/getEnrolledCourse", User.Identity.Name);
+                var response = await client.PostAsJsonAsync("http://localhost:8005/getEnrolledCourse", User.Identity.Name);
                 if (!response.IsSuccessStatusCode)
                 {
                     return this.RedirectWithError("Error fetching courses.");
@@ -412,7 +411,7 @@ namespace Frontend.Controllers
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
             {
-                var response = await client.GetAsync("https://localhost:8002/getAll");
+                var response = await client.GetAsync("http://localhost:8002/getAll");
 
                 if (!response.IsSuccessStatusCode)
                 {

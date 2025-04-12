@@ -37,7 +37,7 @@ namespace Frontend.Controllers
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
             {
-                var response = await client.PostAsJsonAsync("https://localhost:8001/register", data);
+                var response = await client.PostAsJsonAsync("http://localhost:8001/register", data);
 
 
                 if (response.IsSuccessStatusCode)

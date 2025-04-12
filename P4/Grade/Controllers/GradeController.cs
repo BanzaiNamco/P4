@@ -10,12 +10,14 @@ namespace Grade.Controllers
     [ApiController]
     public class GradeController : ControllerBase
     {
+        private readonly ILogger<GradeController> _logger;
         private readonly ApplicationDbContext _dbContext;
         private readonly IHttpClientFactory _httpClientFactory;
-        public GradeController(ApplicationDbContext dbContext, IHttpClientFactory httpClientFactory)
+        public GradeController(ApplicationDbContext dbContext, IHttpClientFactory httpClientFactory, ILogger<GradeController> logger)
         {
             _dbContext = dbContext;
             _httpClientFactory = httpClientFactory;
+            _logger = logger;
         }
 
         [Authorize(Roles = "student")]
@@ -54,6 +56,8 @@ namespace Grade.Controllers
         [HttpPost]
         public async Task<IActionResult> add([FromBody] GradeWithBearerToken data)
         {
+            _logger.LogInformation($"Received data: {data}");
+            _logger.LogInformation($"ASDHKASDAHSDASHDASDASAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA: {data}");
             if (data == null)
             {
                 return BadRequest("Invalid data.");
@@ -71,7 +75,7 @@ namespace Grade.Controllers
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
             {
-                var response = await client.PostAsJsonAsync("https://localhost:8003/incrementSlots", data.Grade.SectionID);
+                var response = await client.PostAsJsonAsync("http://host.docker.internal:8003/incrementSlots", data.Grade.SectionID);
                 if (!response.IsSuccessStatusCode)
                 {
                     return BadRequest("Failed to increment slots.");
@@ -79,6 +83,7 @@ namespace Grade.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError($"Error connecting to the server: {ex.Message}");
                 return BadRequest($"Error connecting to the server: {ex.Message}");
             }
             var maxGradeID = await _dbContext.Grades
@@ -90,7 +95,6 @@ namespace Grade.Controllers
             _dbContext.Grades.Add(data.Grade);
             await _dbContext.SaveChangesAsync();
             return Ok(new { message = "Grade added successfully." });
-
         }
 
         [Authorize(Roles = "student")]
@@ -183,7 +187,7 @@ namespace Grade.Controllers
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
             {
-                var response = await client.PostAsJsonAsync("https://localhost:8003/delete", data.ID);
+                var response = await client.PostAsJsonAsync("http://host.docker.internal:8003/delete", data.ID);
                 if (!response.IsSuccessStatusCode)
                 {
                     return BadRequest("Failed to increment slots.");
@@ -225,7 +229,7 @@ namespace Grade.Controllers
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
             {
-                var response = await client.PostAsJsonAsync("https://localhost:8003/decrementSlots", data.IDWithBearerToken.ID);
+                var response = await client.PostAsJsonAsync("http://host.docker.internal:8003/decrementSlots", data.IDWithBearerToken.ID);
                 if (!response.IsSuccessStatusCode)
                 {
                     return BadRequest("Error decrement slots.");

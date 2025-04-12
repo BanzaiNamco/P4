@@ -28,7 +28,7 @@ namespace Frontend.Controllers
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
             {
-                var response = await client.PostAsJsonAsync("https://localhost:8005/getPrevGrades", User.Identity.Name);
+                var response = await client.PostAsJsonAsync("http://localhost:8005/getPrevGrades", User.Identity.Name);
                 if (!response.IsSuccessStatusCode)
                 {
                     ModelState.AddModelError(string.Empty, "Error fetching grades.");
@@ -64,7 +64,7 @@ namespace Frontend.Controllers
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
             {
-                var response = await client.PostAsJsonAsync("https://localhost:8005/getStudents", id);
+                var response = await client.PostAsJsonAsync("http://localhost:8005/getStudents", id);
                 if (!response.IsSuccessStatusCode)
                 {
                     return this.RedirectWithError("Error Fetching Students.");
@@ -106,7 +106,7 @@ namespace Frontend.Controllers
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
             try
             {
-                var response = await client.PostAsJsonAsync("https://localhost:8005/save", data);
+                var response = await client.PostAsJsonAsync("http://localhost:8005/save", data);
                 if (!response.IsSuccessStatusCode)
                 {
                     return this.RedirectWithError("Error saving grades.");

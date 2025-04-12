@@ -39,7 +39,7 @@ namespace Frontend.Controllers
                 client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
                 try
                 {
-                    var response = await client.PostAsJsonAsync("https://localhost:8003/getByProf", User.Identity.Name);
+                    var response = await client.PostAsJsonAsync("http://localhost:8003/getByProf", User.Identity.Name);
                     if (!response.IsSuccessStatusCode)
                     {
                         ModelState.AddModelError(string.Empty, "Error fetching courses.");

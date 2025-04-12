@@ -38,7 +38,7 @@ namespace Frontend.Controllers
             try
             {
 
-                var response = await client.PostAsJsonAsync("https://localhost:8003/add", data);
+                var response = await client.PostAsJsonAsync("http://localhost:8003/add", data);
                 if (response.IsSuccessStatusCode)
                 {
 
@@ -76,7 +76,7 @@ namespace Frontend.Controllers
             try
             {
                 var data = new { bearerToken, id };
-                var response = await client.PostAsJsonAsync("https://localhost:8005/deleteSection", data);
+                var response = await client.PostAsJsonAsync("http://localhost:8005/deleteSection", data);
                 if (!response.IsSuccessStatusCode)
                 {
                     return BadRequest("Error deleting enrolled students.");
@@ -116,7 +116,7 @@ namespace Frontend.Controllers
                     },
                     Name = User.Identity.Name
                 };
-                var response = await client.PostAsJsonAsync("https://localhost:8005/drop", data);
+                var response = await client.PostAsJsonAsync("http://localhost:8005/drop", data);
                 if (!response.IsSuccessStatusCode)
                 {
                     return BadRequest("Error dropping section.");

@@ -38,7 +38,7 @@ namespace Frontend.Controllers
             var client = _httpClientFactory.CreateClient();
             try
             {
-                var response = await client.PostAsJsonAsync("https://localhost:8001/login", data);
+                var response = await client.PostAsJsonAsync("http://localhost:8001/login", data);
                 if (response.IsSuccessStatusCode)
                 {
                     var result = await response.Content.ReadAsStringAsync();
