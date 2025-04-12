@@ -22,19 +22,13 @@ docker network create p4-network
 ### 3. Run All Nodes Except Frontend in Docker
 
 ```bash
+# Run this if the container doesn't exist yet:
 docker run --network p4-network \
            --name p4-backend \
            --add-host=host.docker.internal:host-gateway \
            -p 5000:8080 \
            p4-image
-```
 
-### 4. Run Frontend Locally
-
-#### Run your frontend normally (e.g., npm run dev or dotnet run)
-
-### 5. Start Existing Container
-
-```bash
+# If the container already exists, just start it:
 docker start p4-backend
 ```
