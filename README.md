@@ -1,7 +1,3 @@
-Sure! Here's a fully copy-pastable and cleaned-up version of your README with example values you can easily replace:
-
----
-
 # P4
 
 ## Getting Started (Local)
