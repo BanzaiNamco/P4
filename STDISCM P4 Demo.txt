@@ -1,5 +1,9 @@
-https://youtu.be/Tu5WqXiyvRM
+Canva: https://www.canva.com/design/DAGj19JEEyc/6Q_tFEKMB5N2QmnVEMdXEg/edit?utm_content=DAGj19JEEyc&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
+
+Youtube: https://youtu.be/Tu5WqXiyvRM
+
 P4 Timestamps (they are in the youtube video's description box as well)
+
 1:09 - JWT
 3:02 - Network setup
 3:23 - Demo of features
